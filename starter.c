@@ -4,9 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static int smSize = sizeof(int);
+
 int createSharedMemorySegment(key_t key){
 	int shmid;
-	if((shmid = shmget(key, 27, IPC_CREAT | IPC_EXCL | 0666)) < 0){
+	if((shmid = shmget(key, smSize, IPC_CREAT | IPC_EXCL | 0666)) < 0){
 		return (-1);
 	}
 	return (shmid);
@@ -25,7 +27,7 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-	//Semaphore keys
+	//Shared Memory keys
 	key_t fullLinesK = 5678;
 	key_t whiteLinesK = 5679;
 	key_t readersK = 5680;
@@ -37,7 +39,7 @@ int main(int argc, char *argv[]){
 	key_t pIdCounterK = 5686;
 	key_t linesK = 5687;
 
-	//Semaphore ids
+	//Shared Memory IDs
 	int fullLinesID = createSharedMemorySegment(fullLinesK);
 	int whiteLinesID = createSharedMemorySegment(whiteLinesK);
 	int readersID = createSharedMemorySegment(readersK);
