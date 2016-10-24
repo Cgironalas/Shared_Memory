@@ -12,8 +12,20 @@ int createSharedMemorySegment(key_t key){
 	return (shmid);
 }
 
-int main(int argc, char *arcgv[]){
-	//Keys de los semaforos
+int main(int argc, char *argv[]){
+ 	int lines; 
+
+    if( argc != 2 ) {
+       	printf("\nERROR: Only 1 parameter expected, with the shared memory size. Program ended.\n\n");
+    	return 0;
+    }
+
+    if (sscanf (argv[1], "%i", &lines)!=1) {
+        printf ("\nERROR: <shared_mem_size> not an integer\n\n");
+        return 0;
+    }
+
+	//Semaphore keys
 	key_t fullLinesK = 5678;
 	key_t whiteLinesK = 5679;
 	key_t readersK = 5680;
@@ -25,7 +37,7 @@ int main(int argc, char *arcgv[]){
 	key_t pIdCounterK = 5686;
 	key_t linesK = 5687;
 
-	//Ids de los semaforos
+	//Semaphore ids
 	int fullLinesID = createSharedMemorySegment(fullLinesK);
 	int whiteLinesID = createSharedMemorySegment(whiteLinesK);
 	int readersID = createSharedMemorySegment(readersK);
@@ -40,7 +52,7 @@ int main(int argc, char *arcgv[]){
 	if(fullLinesID == -1 || whiteLinesID == -1 || readersID == -1 || selfishID == -1 ||
 		selfishConsecutivesID == -1 || finishID == -1 || writerID == -1 || fileID == -1 ||
 		pIdCunterID == -1 || linesID == -1){
-		perror("No se logro iniciar todos los segmentos de memoria compartida.");
+		perror("Couldn't initialize all shared memory segments");
 		
 		//if(finishID > 0){
 		//	if((shm = shmat(finishID, NULL, 0)) == (char *) -1){
@@ -53,7 +65,7 @@ int main(int argc, char *arcgv[]){
 		exit(1);
 	}
 
-	printf("Todos se hicieron bien.\n");
+	printf("All shared memory spaces successfully created.\n");
 
 	exit(0);
 }
