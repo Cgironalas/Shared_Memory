@@ -19,10 +19,10 @@ int getSharedMemorySegment(key_t key){
 int deleteSharedMemorySegment(int ID){
 	//Esto marca la memoria compartida para morir, pero todos los procesos tienen que estar como deattached para que se borre.
 	if((rtrn = shmctl(ID, IPC_RMID, &shmid_ds)) < 0){
-		perror("Error borrando el espacio de memoria compartida");
+		perror("ERROR: Failed deleting shared memory segment");
 		return(-1);
 	}else{
-		printf("Se logro borrar la memoria compartida\n");
+		printf("Shared memory segment successfully deleted\n");
 		return rtrn;
 	}
 }
@@ -31,7 +31,7 @@ char *attatchSharedMemorySegment(int ID){
 	//Se acopla a la memoria compartida
 	char *shm;
 	if((shm = shmat(ID, NULL, 0)) == (char *) -1){
-		perror("No se logro acoplar al segmento de memoria compartida");
+		perror("ERROR: Couldn't attach shared memory segment");
 		return NULL;
 	}//else{
 	//	deleteSharedMemorySegment(fullLinesID);
