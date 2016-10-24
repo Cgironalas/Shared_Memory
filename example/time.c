@@ -1,54 +1,24 @@
-/*
- * shm-client - client program to demonstrate shared memory.
- */
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 #include <stdio.h>
+#include <time.h>
 
-#define SHMSZ     27
+int main (){
 
-main()
-{
-    int shmid;
-    key_t key;
-    char *shm, *s;
+    time_t rawtime;
+    struct tm * timeinfo;
 
-    /*
-     * We need to get the segment named
-     * "5678", created by the server.
-     */
-    key = 5678;
+    int hora[6];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
 
-    /*
-     * Locate the segment.
-     */
-    if ((shmid = shmget(key, SHMSZ, 0666)) < 0) {
-        perror("shmget");
-        exit(1);
-    }
+    hora[0] = timeinfo->tm_mday;
+    hora[1] = timeinfo->tm_mon + 1;
+    hora[2] = timeinfo->tm_year + 1900;
+    hora[3] = timeinfo->tm_hour;
+    hora[4] = timeinfo->tm_min;
+    hora[5] = timeinfo->tm_sec;
 
-    /*
-     * Now we attach the segment to our data space.
-     */
-    if ((shm = shmat(shmid, NULL, 0)) == (char *) -1) {
-        perror("shmat");
-        exit(1);
-    }
+    printf ( "Current local time and date:\n");
+    printf("\tDay: %i, Month: %i, Year: %i, Hour: %i, Min: %i, Sec: %i \n", hora[0], hora[1], hora[2], hora[3], hora[4], hora[5]);
 
-    /*
-     * Now read what the server put in the memory.
-     */
-    for (s = shm; *s != NULL; s++)
-        putchar(*s);
-    putchar('\n');
-
-    /*
-     * Finally, change the first character of the 
-     * segment to '*', indicating we have read 
-     * the segment.
-     */
-    *shm = '*';
-
-    exit(0);
+    return 0;
 }
