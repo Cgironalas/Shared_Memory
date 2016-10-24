@@ -7,14 +7,26 @@
 int main(int argc, char *argv[]){
 
 	int readers_amount;
+	int read_time;
+	int sleep_time;
 
-    if( argc != 2 ) {
-       	printf("\nERROR: Only 1 parameter expected, with the amount of readers to create. Program ended.\n\n");
+    if( argc != 4 ) {
+       	printf("\nERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;
     }
 
     if (sscanf (argv[1], "%i", &readers_amount)!=1) {
         printf ("\nERROR: <readers_amount> not an integer\n\n");
+        return 0;
+    }
+
+    if (sscanf (argv[2], "%i", &read_time)!=1) {
+        printf ("\nERROR: <read_time> not an integer\n\n");
+        return 0;
+    }
+
+    if (sscanf (argv[3], "%i", &sleep_time)!=1) {
+        printf ("\nERROR: <sleep_time> not an integer\n\n");
         return 0;
     }
 
