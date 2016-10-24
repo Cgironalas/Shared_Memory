@@ -14,6 +14,20 @@ int createSharedMemorySegment(key_t key){
 	return (shmid);
 }
 
+int *attatchSharedMemorySegment(key_t key){
+    int *shm;
+    int ID = createSharedMemorySegment(key);
+    if(ID != -1){
+        if((shm = shmat(ID, NULL, 0)) == (int *) -1){
+            return NULL;
+        }else{
+            return shm;
+        }
+    }else{
+        return NULL;
+    }
+}
+
 int main(int argc, char *argv[]){
  	int lines; 
 
@@ -39,32 +53,98 @@ int main(int argc, char *argv[]){
 	key_t pIdCounterK = 5686;
 	key_t linesK = 5687;
 
-	//Shared Memory IDs
-	int fullLinesID = createSharedMemorySegment(fullLinesK);
-	int whiteLinesID = createSharedMemorySegment(whiteLinesK);
-	int readersID = createSharedMemorySegment(readersK);
-	int selfishID = createSharedMemorySegment(selfishK);
-	int selfishConsecutivesID = createSharedMemorySegment(selfishConsecutivesK);
-	int finishID = createSharedMemorySegment(finishK);
-	int writerID = createSharedMemorySegment(writerK);
-	int fileID = createSharedMemorySegment(fileK);
-	int pIdCunterID = createSharedMemorySegment(pIdCounterK);
-	int linesID = createSharedMemorySegment(linesK);
+	int *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *selfishConsecutivesSHM,
+	*finishSHM, *writerSHM, *fileSHM, *pIdCounterSHM, *linesSHM;
+	int *s;
 
-	if(fullLinesID == -1 || whiteLinesID == -1 || readersID == -1 || selfishID == -1 ||
-		selfishConsecutivesID == -1 || finishID == -1 || writerID == -1 || fileID == -1 ||
-		pIdCunterID == -1 || linesID == -1){
-		perror("Couldn't initialize all shared memory segments");
-		
-		//if(finishID > 0){
-		//	if((shm = shmat(finishID, NULL, 0)) == (char *) -1){
-		//		perror("No se logro acoplar al segmento de memoria compartida");
-		//		exit(1);
-		//	}
-		//	s = shm;		//Setea en s la direccion de inicio de la memoria compartida
-		//	s* = '*';		//Escribe un '*' en el primer campo de memoria compartida
-		//}
-		exit(1);
+    fullLinesSHM = attatchSharedMemorySegment(fullLinesK);
+    if(fullLinesSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for FULL_LINES.");
+    	exit(1);
+	}else{
+		s = fullLinesSHM;
+		*s = 0;
+	}
+
+    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesK);
+    if(whiteLinesSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for WHITE_LINES.");
+    	exit(1);
+	}else{
+		s = whiteLinesSHM;
+		*s = lines;
+	}
+
+    readersSHM = attatchSharedMemorySegment(readersK);
+    if(readersSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for READERS.");
+    	exit(1);
+	}else{
+		s = readersSHM;
+		*s = 0;
+	}
+
+    selfishSHM = attatchSharedMemorySegment(selfishK);
+    if(selfishSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for SELFISH.");
+    	exit(1);
+	}else{
+		s = selfishSHM;
+		*s = 0;
+	}
+
+    selfishConsecutivesSHM = attatchSharedMemorySegment(selfishConsecutivesK);
+    if(selfishConsecutivesSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for SELFISH_CONSECUTIVES.");
+    	exit(1);
+	}else{
+		s = selfishConsecutivesSHM;
+		*s = 0;
+	}
+
+    finishSHM = attatchSharedMemorySegment(finishK);
+    if(finishSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for FINISH.");
+    	exit(1);
+	}else{
+		s = finishSHM;
+		*s = 0;
+	}
+
+    writerSHM = attatchSharedMemorySegment(writerK);
+    if(writerSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for WRITER.");
+    	exit(1);
+	}else{
+		s = writerSHM;
+		*s = 0;
+	}
+
+    fileSHM = attatchSharedMemorySegment(fileK);
+   	if(fileSHM == NULL){
+   		perror("ERROR: Couldn't create shared memory for FILE.");
+    	exit(1);
+	}else{
+		s = fileSHM;
+		*s = 0;
+	}
+
+   	pIdCounterSHM = attatchSharedMemorySegment(pIdCounterK);
+    if(pIdCounterSHM == NULL){
+    	perror("ERROR: Couldn't create shared memory for ID_COUNTER.");
+    	exit(1);
+	}else{
+		s = pIdCounterSHM;
+		*s = 0;
+	}
+
+    linesSHM = attatchSharedMemorySegment(linesK);
+	if(linesSHM == NULL){
+		perror("ERROR: Couldn't create shared memory for LINES.");
+    	exit(1);
+	}else{
+		s = linesSHM;
+		*s = 0;
 	}
 
 	printf("All shared memory spaces successfully created.\n");

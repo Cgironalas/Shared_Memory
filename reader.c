@@ -5,9 +5,17 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+static int pId = 0;
+static FILE *results_file;
 static pthread_t reader;
 static pthread_t threads[10000];
 static int smSize = sizeof(int);
+
+struct Process{
+    int pId;
+    int block;
+    void (*function)();
+} process_dafault = {0, 0, NULL};
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key){
@@ -19,13 +27,24 @@ int getSharedMemorySegment(key_t key){
 }
 
 //Attach the process to a shared memory segment
-char *attatchSharedMemorySegment(int ID){
+char *attatchSharedMemorySegment(key_t key){
     char *shm;
-    if((shm = shmat(ID, NULL, 0)) == (char *) -1){
-        perror("ERROR: Couldn't attach shared memory segment");
+    int ID = getSharedMemorySegment(key);
+    if(ID != -1){
+        if((shm = shmat(ID, NULL, 0)) == (char *) -1){
+            perror("ERROR: Couldn't attach shared memory segment");
+            return NULL;
+        }else{
+            return shm;
+        }
+    }else{
+        perror("ERROR: Couldn't create shared memory segment.");
         return NULL;
     }
-    return shm;
+}
+
+void *beginReading(void *data){
+
 }
 
 int main(int argc, char *argv[]){
@@ -60,13 +79,15 @@ int main(int argc, char *argv[]){
     key_t whiteLinesK = 5679;
     key_t readersK = 5680;
     key_t selfishK = 5681;
-
+    key_t selfishConsecutivesK = 5682;
     key_t finishK = 5683;
     key_t writerK = 5684;
     key_t fileK = 5685;
     key_t pIdCounterK = 5686;
+    key_t linesK = 5687;
 
     //Shared memory IDs
+    /*
     int fullLinesID = getSharedMemorySegment(fullLinesK);
     int whiteLinesID = getSharedMemorySegment(whiteLinesK);
     int readersID = getSharedMemorySegment(readersK);
@@ -75,16 +96,43 @@ int main(int argc, char *argv[]){
     int finishID = getSharedMemorySegment(finishK);
     int writerID = getSharedMemorySegment(writerK);
     int fileID = getSharedMemorySegment(fileK);
-    int pIdCunterID = getSharedMemorySegment(pIdCounterK);
+    
+    int linesID = getSharedMemorySegment(linesK);
+    */
 
     //Shared memory locations
-    char *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *finishSHM,
-    *writerSHM, *fileSHM, *pIdCounterSHM;
+    char *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *selfishConsecutivesSHM, *finishSHM,
+    *writerSHM, *fileSHM, *pIdCounterSHM, *linesSHM;
 
     //Need to attach the process to Shared Memory segments before creating child threads
+    /*
+    fullLinesSHM = attatchSharedMemorySegment(fullLinesID);
+    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesID);
+    readersSHM = attatchSharedMemorySegment(readersID);
+    selfishSHM = attatchSharedMemorySegment(selfishID);
+    
+    finishSHM = attatchSharedMemorySegment(finishID);
+    writerSHM = attatchSharedMemorySegment(writerID);
+    fileSHM = attatchSharedMemorySegment(fileID);
+    
+    linesSHM = attatchSharedMemorySegment(linesID);
+    */
+
+    fullLinesSHM = attatchSharedMemorySegment(fullLinesK);
+    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesK);
+    readersSHM = attatchSharedMemorySegment(readersK);
+    selfishSHM = attatchSharedMemorySegment(selfishK);
+    
+    finishSHM = attatchSharedMemorySegment(finishK);
+    writerSHM = attatchSharedMemorySegment(writerK);
+    fileSHM = attatchSharedMemorySegment(fileK);
+    
+    linesSHM = attatchSharedMemorySegment(linesK);
+
+    struct Process process;
 
     for(int i = 0; i < readers_amount; i++){
-        pthread_create(&reader, NULL, beginReading);
+        pthread_create(&reader, NULL, beginReading, &process);
         pthread_join(reader, NULL);
     }
 }
