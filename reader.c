@@ -11,11 +11,17 @@ static pthread_t reader;
 static pthread_t threads[10000];
 static int smSize = sizeof(int);
 
+static int readers_amount;
+static int read_time;
+static int sleep_time;
+
 struct Process{
     int pId;
     int block;
+    int type;
     void (*function)();
 } process_dafault = {0, 0, NULL};
+
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key){
@@ -47,11 +53,22 @@ void *beginReading(void *data){
 
 }
 
-int main(int argc, char *argv[]){
+void p(int s, struct Process p) {
+    while (s <= 0){
+        p.block = 1;
+    }
+    s -= 1;
+}
 
-	int readers_amount;
-	int read_time;
-	int sleep_time;
+void v(int s, struct Process p ) {
+    while (s < 0){
+        p.block = 0;
+    }
+    s += 1;
+}
+
+
+int main(int argc, char *argv[]){
 
     if( argc != 4 ) {
        	printf("\nERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
@@ -72,7 +89,6 @@ int main(int argc, char *argv[]){
         printf ("\nERROR: <sleep_time> not an integer\n\n");
         return 0;
     }
-
 
     //Shared memory keys
     key_t fullLinesK = 5678;

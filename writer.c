@@ -7,8 +7,6 @@
 #include <pthread.h>
 
 static int pId = 0;
-static FILE *results_file;
-static FILE *temp;
 static pthread_t reader;
 static pthread_t threads[10000];
 static int smSize = sizeof(int);
@@ -16,8 +14,9 @@ static int smSize = sizeof(int);
 struct Process{
     int pId;
     int block;
+    int type;
     void (*function)();
-} process_defaul = {0, 0, NULL};
+} process_default = {0, 0, 0, NULL}; 
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key){
@@ -59,17 +58,17 @@ void v(int s, struct Process p ) {
     s += 1;
 }
 
+void writeMessageTxt (int pid, int line) {
+    FILE *results_file;
+    FILE *temp;
 
-void writeMessage (int pid, int line) {
-    
-    int line_to_write = line; //largo en chars + 1 (el \n)
+    char filename[] = "results.txt";
+    char tempfilename[] = "temp.txt";
 
-    results_file = fopen("results.txt", "r");
-    temp = fopen("temp.txt", "w+");
+    results_file = fopen(filename, "r");
+    temp = fopen(tempfilename, "w+");
 
-    if (results_file == NULL) {
-        printf("ERROR: Can't open results file\n");
-    }
+    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
     
     time_t rawtime;
     struct tm * timeinfo;
@@ -84,26 +83,45 @@ void writeMessage (int pid, int line) {
     char buf[256];
 
     while (fgets(buf, sizeof(buf), results_file)){
+        if (count == line){ 
+            sprintf(buf, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);
+            fputs(buf, temp); 
+        }
 
-        if (count == line_to_write){
-            fputs("new new new line  \n", temp);    
-        }
-        
-        else {
-            fprintf(temp, "%s", buf);
-        }
+        else { fprintf(temp, "%s", buf); }
+
         count++;
     }
 
-
-    //printf("\t PID: %i, Day: %i, Month: %i, Year: %i, Hour: %i, Min: %i, Sec: %i \n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5]);    
-
-    //char str[] = "This is tutorialspoint.com";
-    //fwrite(str , 1 , sizeof(str) , results_file );
-    
-    //fprintf(results_file,"\n\t PID: %i, Day: %i, Month: %i, Year: %i, Hour: %i, Min: %i, Sec: %i \n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5]);
+    if (count < line) { printf("ERROR: specified line not part of the initialized bounds"); }
+    int remove_confirm = remove(filename);
+    if (remove_confirm != 0) { printf("ERROR: unable to delete the file"); }
+    int rename_confirm = rename(tempfilename, filename);
+    if (rename_confirm != 0) { printf("ERROR: unable to rename the file"); }
+   
     fclose(results_file);
     fclose(temp);
+}
+
+void writeLogTxt (int pid, int line) {
+    FILE *results_file;
+
+    char filename[] = "log.txt";
+    results_file = fopen(filename, "a");
+    
+    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    int timestamp[6];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
+    
+    fprintf(results_file, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);  
+    fclose(results_file);
 }
 
 void *beginReading(void* data){
@@ -190,7 +208,7 @@ int main(int argc, char *argv[]){
     linesSHM = attatchSharedMemorySegment(linesK);
 
     //Need to attach the process to Shared Memory segments before creating child threads
-    struct Process process = process_defaul;
+    struct Process process = process_default;
     
     for(int i = 0; i < writers_amount; i++){
         process.pId = i;
@@ -199,5 +217,9 @@ int main(int argc, char *argv[]){
     }
 
     //Printea y escribe en archivo.
-    writeMessage(10,3);
+    writeMessageTxt(10,20);
+    writeMessageTxt(10,21);
+    writeMessageTxt(10,22);
+    writeMessageTxt(10,23);
+       
 }
