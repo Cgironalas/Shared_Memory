@@ -29,7 +29,7 @@ int getSharedMemorySegment(key_t key){
 }
 
 //Attach the process to a shared memory segment
-char *attatchSharedMemorySegment(key_t key){
+char *attachSharedMemorySegment(key_t key){
     char *shm;
     int ID = getSharedMemorySegment(key);
     if(ID != -1){
@@ -185,28 +185,28 @@ int main(int argc, char *argv[]){
     *writerSHM, *fileSHM, *linesSHM;
 
     /*
-    fullLinesSHM = attatchSharedMemorySegment(fullLinesID);
-    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesID);
-    readersSHM = attatchSharedMemorySegment(readersID);
-    selfishSHM = attatchSharedMemorySegment(selfishID);
+    fullLinesSHM = attachSharedMemorySegment(fullLinesID);
+    whiteLinesSHM = attachSharedMemorySegment(whiteLinesID);
+    readersSHM = attachSharedMemorySegment(readersID);
+    selfishSHM = attachSharedMemorySegment(selfishID);
     
-    finishSHM = attatchSharedMemorySegment(finishID);
-    writerSHM = attatchSharedMemorySegment(writerID);
-    fileSHM = attatchSharedMemorySegment(fileID);
+    finishSHM = attachSharedMemorySegment(finishID);
+    writerSHM = attachSharedMemorySegment(writerID);
+    fileSHM = attachSharedMemorySegment(fileID);
     
-    linesSHM = attatchSharedMemorySegment(linesID);
+    linesSHM = attachSharedMemorySegment(linesID);
     */
 
-    fullLinesSHM = attatchSharedMemorySegment(fullLinesK);
-    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesK);
-    readersSHM = attatchSharedMemorySegment(readersK);
-    selfishSHM = attatchSharedMemorySegment(selfishK);
+    fullLinesSHM = attachSharedMemorySegment(fullLinesK);
+    whiteLinesSHM = attachSharedMemorySegment(whiteLinesK);
+    readersSHM = attachSharedMemorySegment(readersK);
+    selfishSHM = attachSharedMemorySegment(selfishK);
     
-    finishSHM = attatchSharedMemorySegment(finishK);
-    writerSHM = attatchSharedMemorySegment(writerK);
-    fileSHM = attatchSharedMemorySegment(fileK);
+    finishSHM = attachSharedMemorySegment(finishK);
+    writerSHM = attachSharedMemorySegment(writerK);
+    fileSHM = attachSharedMemorySegment(fileK);
     
-    linesSHM = attatchSharedMemorySegment(linesK);
+    linesSHM = attachSharedMemorySegment(linesK);
 
     //Need to attach the process to Shared Memory segments before creating child threads
     struct Process process = process_default;
