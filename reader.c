@@ -16,13 +16,67 @@ static int readers_amount;
 static int read_time;
 static int sleep_time;
 
+//Shared memory locations 
+static char *fileSHM, *fileHandler; 
+ 
+static int *fullLinesSHM, *fullHandler; 
+static int *whiteLinesSHM, *whiteHandler; 
+static int *readersSHM, *readersHandler; 
+static int *selfishSHM, *selfishHandler; 
+static int *selfishConsecutivesSHM, *selfishConsecutivesHandler; 
+static int *finishSHM, *finishHandler; 
+static int *writerSHM, *writerHandler; 
+static int *processesSHM, *processesHandler;
+static int *linesSHM, *linesHandler;
+
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
 struct Process{
     int pId;
-    int block;
-    int type;
+    int state;
+    int line;
     void (*function)();
-} process_default = {0, 0, 0,  NULL};
+} process_default = {0, 0, 0, NULL}; 
 
+static struct Process processes[10000] = {0, 0, 0, NULL};
+
+//Get the ID number of a shared memory segment, needed to get the address
+int getSharedMemorySegment(key_t key, int size){
+    int shmid;
+    if((shmid = shmget(key, size, 0666)) < 0){
+        return (-1);
+    }
+    return (shmid);
+}
+
+//Attach the process to a shared memory segment
+char *attachCharSharedMemorySegment(key_t key, int size){
+    char *shm;
+    int ID = getSharedMemorySegment(key, size);
+    if(ID != -1){
+        if((shm = shmat(ID, NULL, 0)) == (char *) -1){
+            return NULL;
+        }else{
+            return shm;
+        }
+    }else{
+        return NULL;
+    }
+}
+int *attachSharedMemorySegment(key_t key, int size){ 
+    int *shm; 
+    int ID = getSharedMemorySegment(key, size); 
+    if(ID != -1){ 
+        if((shm = shmat(ID, NULL, 0)) == (int *) -1){ 
+            return NULL; 
+        }else{ 
+            return shm; 
+        } 
+    }else{ 
+        printf("D\n"); 
+        return NULL; 
+    } 
+} 
 
 void writeLogRead (int pid, int line, char buffed[]) {
     FILE *results_file;
@@ -109,7 +163,48 @@ char *attatchSharedMemorySegment(key_t key){
 }
 
 void *beginReading(void *data){
+    struct Process *process = (struct Process *) data;
+    while(1){
+        processesHandler = processesSHM;
+        fullHandler = fullLinesSHM;
+        whiteHandler = whiteLinesSHM;
+        readersHandler = readersSHM;
+        selfishHandler = selfishSHM;
+        selfishConsecutivesHandler = selfishConsecutivesSHM;
+        finishHandler = finishSHM;
+        writerHandler = writerSHM;
+        fileHandler = fileSHM;
 
+        if(*finishHandler == 1){
+            break;
+        }else{
+            pthread_mutex_lock(&lock);
+            
+            if(1 == 1){
+
+                readersHandler[0] += 1;
+                selfishConsecutivesHandler[0] = 0;
+
+                processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
+
+                readLine(process->pId, process->line);
+                //Leer memoria compartida
+                process->line = processesHandler[(process->pId * 4) + 4];
+
+                sleep(read_time);
+                processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
+
+                writerHandler[0] = 0;
+                sleep(sleep_time);
+
+            }else{
+                processesHandler[(process->pId * 4) + 3] = 3;  //Estado bloqueado
+            }
+
+            pthread_mutex_unlock(&lock);
+
+        }
+    }
 }
 
 void p(int s, struct Process p) {
@@ -148,6 +243,10 @@ int main(int argc, char *argv[]){
         printf ("\nERROR: <sleep_time> not an integer\n\n");
         return 0;
     }
+
+    read_time = argv[2];
+    sleep_time = argv[3];
+    readers_amount = argv[1];
 
     //Shared memory keys
     key_t fullLinesK = 5678;
