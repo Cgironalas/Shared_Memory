@@ -1,5 +1,11 @@
-WRITER: PID: 10; Hour: 11, Min: 6, Sec: 22; Line: 20
-WRITER: PID: 10; Hour: 11, Min: 6, Sec: 22; Line: 21
-WRITER: PID: 10; Hour: 11, Min: 6, Sec: 22; Line: 22
-WRITER: PID: 10; Hour: 11, Min: 6, Sec: 22; Line: 23
-READER: PID: 2; Hour: 11, Min: 6, Sec: 25; Line: 20; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 6, Sec: 22; Line: 20
+WRITER: PID: 10; Hour: 11, Min: 42, Sec: 1; Line: 20
+WRITER: PID: 10; Hour: 11, Min: 42, Sec: 1; Line: 21
+WRITER: PID: 10; Hour: 11, Min: 42, Sec: 1; Line: 22
+WRITER: PID: 10; Hour: 11, Min: 42, Sec: 1; Line: 23
+READER: PID: 2; Hour: 11, Min: 42, Sec: 5; Line: 0; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
+READER: PID: 2; Hour: 11, Min: 42, Sec: 27; Line: 22; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 22
+READER: PID: 2; Hour: 11, Min: 43, Sec: 9; Line: 0; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
+READER: PID: 2; Hour: 11, Min: 46, Sec: 38; Line: 25; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
+READER: PID: 2; Hour: 11, Min: 46, Sec: 49; Line: 50; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
+READER: PID: 2; Hour: 11, Min: 48, Sec: 10; Line: 25; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
+READER: PID: 2; Hour: 11, Min: 48, Sec: 21; Line: 22; Read: PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 22

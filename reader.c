@@ -3,6 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 
 static int pId = 0;
@@ -53,32 +54,50 @@ void readLine (int pid, int line) {
     results_file = fopen(filename, "r");
     
     if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
-    
-    time_t rawtime;
-    struct tm * timeinfo;
-
-    int timestamp[6];
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-
-    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
 
     int count = 0;
     char buf[256];
+    int foundsomething = 0;
 
     while (fgets(buf, sizeof(buf), results_file)){
-        if (count == line){ 
+
+        if (count >= line && strcmp(buf,"\n") != 0){ 
             writeLogRead(pid, line, buf);
             printf("%s\n", buf);
+
+            count++;
+            line = count;
+            foundsomething = 1;
+            break;
         }
         count++;
     }
 
-    if (count <= line){
-        printf("ERROR: Couldn't access such line");
+    fclose(results_file);
+    if (count < line){ 
+        printf("ERROR: Couldn't access such line\n"); 
     }
 
-    fclose(results_file);
+    else {
+        int newline = 0;
+        results_file = fopen(filename, "r");   
+        if (foundsomething == 0) {
+            count = 0;
+            while (fgets(buf, sizeof(buf), results_file)){
+
+                if (count >= newline && strcmp(buf,"\n") != 0){ 
+                    writeLogRead(pid, line, buf);
+                    printf("%s\n", buf);
+
+                    count++;
+                    line = count;
+                    break;
+                }
+                count++;
+            }
+        }
+        fclose(results_file);    
+    }    
 }
 
 
@@ -97,13 +116,13 @@ char *attatchSharedMemorySegment(key_t key){
     int ID = getSharedMemorySegment(key);
     if(ID != -1){
         if((shm = shmat(ID, NULL, 0)) == (char *) -1){
-            perror("ERROR: Couldn't attach shared memory segment");
+            perror("ERROR: Couldn't attach shared memory segment\n");
             return NULL;
         }else{
             return shm;
         }
     }else{
-        perror("ERROR: Couldn't create shared memory segment.");
+        perror("ERROR: Couldn't create shared memory segment.\n");
         return NULL;
     }
 }
@@ -211,5 +230,5 @@ int main(int argc, char *argv[]){
         pthread_join(reader, NULL);
     }
 
-    readLine(2, 20);
+    readLine(2, 22);
 }
