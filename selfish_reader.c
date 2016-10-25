@@ -3,6 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 void writeLogStolen (int pid, int line, char buffed[]) {
@@ -54,7 +55,7 @@ void stealMessageTxt (int pid, int line) {
     char buffed[256];
 
     while (fgets(buf, sizeof(buf), results_file)){
-        if (count >= line){ 
+        if (count == line){ 
             fputs("\n", temp); 
             sprintf(buffed,"%s",buf);
         }
@@ -72,7 +73,11 @@ void stealMessageTxt (int pid, int line) {
     
     fclose(results_file);
     fclose(temp);
-    writeLogStolen(pid, line, buffed);
+
+    if (strcmp(buffed,"\n") != 0) {
+        writeLogStolen(pid, line, buffed);    
+    }
+    
 }
 
 int main(int argc, char *argv[]){
@@ -102,6 +107,6 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    stealMessageTxt(2, 20);
+    stealMessageTxt(2, 11);
 
 }

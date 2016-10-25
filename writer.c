@@ -132,8 +132,6 @@ void writeMessageTxt (int pid, int line) {
     }else {
         writeLogTxt(pid, line);    
     }
-
-    
 }
 
 void *beginReading(void* data){
