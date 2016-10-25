@@ -4,21 +4,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include <string.h>
+#include <semaphore.h>
 #include <pthread.h>
 
-static int pId = 0;
 static int lines;
+static int writers_amount;
+static int write_time;
+static int sleep_time;
+static int type = 1;
 static pthread_t reader;
 static pthread_t threads[10000];
 
+    //Shared memory locations 
+static char *fileSHM, *fileHandler; 
+ 
+static int *fullLinesSHM, *fullHandler; 
+static int *whiteLinesSHM, *whiteHandler; 
+static int *readersSHM, *readersHandler; 
+static int *selfishSHM, *selfishHandler; 
+static int *selfishConsecutivesSHM, *selfishConsecutivesHandler; 
+static int *finishSHM, *finishHandler; 
+static int *writerSHM, *writerHandler; 
+static int *processesSHM, *processesHandler;
+static int *linesSHM, *linesHandler;
+
+static pthread_mutex_t lock;
+
+
 struct Process{
     int pId;
-    int block;
-    int type;
+    int state;
     int line;
     void (*function)();
-} process_default = {0, 0, 0, 0, NULL}; 
+} process_default = {0, 0, 0, NULL}; 
+
+static struct Process processes[10000] = {0, 0, 0, NULL};
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key, int size){
@@ -60,14 +82,14 @@ int *attachSharedMemorySegment(key_t key, int size){
 
 void p(int s, struct Process p) {
     while (s <= 0){
-        p.block = 1;
+        p.state = 1;
     }
     s -= 1;
 }
 
 void v(int s, struct Process p ) {
     while (s < 0){
-        p.block = 0;
+        p.state = 0;
     }
     s += 1;
 }
@@ -121,6 +143,7 @@ void writeMessageTxt (int pid, int line) {
     while (fgets(buf, sizeof(buf), results_file)){
         if (count >= line && strcmp(buf,"\n") == 0 && wrote == 0){ 
             line = count+1;
+            processesHandler[(pid*4)+4] = count + 1;
             sprintf(buf, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);
             fputs(buf, temp); 
             wrote = 1;
@@ -146,35 +169,72 @@ void writeMessageTxt (int pid, int line) {
     }
 }
 
-void writeMessageSHM(int pid, int currentLine, char *shm, int lines){ 
+void writeMessageSHM(int pid, int currentLine){ 
     int place = 82 * currentLine; 
-    while(shm[place] != 0){ 
+    while(fileHandler[place] != 0){ 
         place += 82; 
-        if(place == 82*lines){ 
+        if(place == 82 * lines){ 
             place = 0; 
         } 
     } 
-    char message[82] = "PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 52, Sec: 3; Line: 10"; 
+    char message[82] = "PID: %i; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 52, Sec: 3; Line: 10", pId; 
     for(int i = 0; i < 82; i++){ 
-        shm[place + i] = message[i]; 
-    } 
- 
+        fileHandler[place + i] = message[i]; 
+    }
 } 
  
-
 void *beginReading(void* data){
     struct Process *process = (struct Process *) data;
+    printf("Id: %i\n", process->pId);
+    while(1){
+        processesHandler = processesSHM;
+        fullHandler = fullLinesSHM;
+        whiteHandler = whiteLinesSHM;
+        readersHandler = readersSHM;
+        selfishHandler = selfishSHM;
+        selfishConsecutivesHandler = selfishConsecutivesSHM;
+        finishHandler = finishSHM;
+        writerHandler = writerSHM;
+        fileHandler = fileSHM;
+        if(*finishHandler == 1){
+            break;
+        }else{
+            if(*whiteHandler > 0 && *readersHandler == 0 && *selfishSHM == 0 && *writerHandler == 0){
+                printf("write\n");
+                pthread_mutex_lock(&lock);
+
+                *writerHandler = 1;
+                *selfishConsecutivesHandler = 0;
+                processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
+
+                writeMessageTxt(process->pId, process->line);
+                //writeMessageSHM(process->pId, process->line);
+                printf("%i\n",process->pId);
+                sleep(write_time);
+                processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
+                *whiteHandler -= 1;
+                *fullHandler += 1;
+                *writerHandler = 0;
+                
+                pthread_mutex_unlock(&lock);
+                printf("finish write\n");
+                sleep(sleep_time);
+
+            }else{
+                processesHandler[(process->pId * 4) + 3] = 3;  //Estado bloqueado
+            }
+        }
+    }
 }
 
 int main(int argc, char *argv[]){
-
-	int writers_amount; 
-	int write_time;
-	int sleep_time;
-
+    if(pthread_mutex_init(&lock,NULL) != 0){
+        perror("ERROR: creating mutex");
+        return (1);
+    }
     if( argc != 4 ) {
-       	printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
-    	return 0;
+        printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
+        return 0;
     }
     if (sscanf (argv[1], "%i", &writers_amount)!=1) {
         printf ("\nERROR: <writers_amount> not an integer\n\n");
@@ -201,19 +261,6 @@ int main(int argc, char *argv[]){
     key_t processesK = 5686;
     key_t linesK = 5687;
 
-    //Shared memory locations 
-    char *fileSHM, *fileHandler; 
- 
-    int *fullLinesSHM, *fullHandler; 
-    int *whiteLinesSHM, *whiteHandler; 
-    int *readersSHM, *readersHandler; 
-    int *selfishSHM, *selfishHandler; 
-    int *selfishConsecutivesSHM, *selfishConsecutivesHandler; 
-    int *finishSHM, *finishHandler; 
-    int *writerSHM, *writerHandler; 
-    int *processesSHM, *processesHandler;
-    int *linesSHM, *linesHandler;
- 
     linesSHM = attachSharedMemorySegment(linesK, sizeof(int));
     if(linesSHM == NULL){
         perror("ERROR: Couldn't get shared memory for LINES.");
@@ -277,26 +324,62 @@ int main(int argc, char *argv[]){
     }
 
     ///////////BEGIN
-    //Need to attach the process to Shared Memory segments before creating child threads
-    struct Process process = process_default;
-    
+    //Need to attach the process to Shared Memory segments before creating child threads    
+    processesHandler = processesSHM;
+    fullHandler = fullLinesSHM;
+    whiteHandler = whiteLinesSHM;
+    readersHandler = readersSHM;
+    selfishHandler = selfishSHM;
+    selfishConsecutivesHandler = selfishConsecutivesSHM;
+    finishHandler = finishSHM;
+    writerHandler = writerSHM;
+    fileHandler = fileSHM;
+
+
     for(int i = 0; i < writers_amount; i++){
-        process.pId = i;
-        pthread_create(&reader, NULL, beginReading, &process);
-        pthread_join(reader, NULL);
+        printf("ID %i\n", i);
+        while(processesHandler[0] != 0){}
+        printf("A\n");
+        processesHandler[0] = 1;
+
+        int counter = 0;
+        while(processesHandler[(counter*4)+1] != 0){
+            counter += 4;
+            if(counter >= 40000){
+                break;
+            }
+        }
+        printf("B\n");
+        processesHandler[(counter*4) + 1] = counter;      //ID
+        processesHandler[(counter*4) + 2] = type;   //Tipo
+        processesHandler[(counter*4) + 3] = 0;      //Estado
+        processesHandler[(counter*4) + 4] = 0;      //Linea
+        processesHandler[0] = 0;
+        printf("C\n");
+        processes[i].pId = counter;
+
+        pthread_create(&(threads[i]), NULL, beginReading, &processes[i]);
+        
+        printf("D\n");
     }
 
-    //Printea y escribe en archivo.
-    writeMessageTxt(10,10);
-    fileHandler = fileSHM; 
+    int i = 0;
+    for (i = 0; i < writers_amount; ++i) {
+        pthread_join(threads[i], NULL);    
+    }
+    pthread_mutex_destroy(&lock);
  
-    writeMessageSHM(10, 10, fileHandler, lines); 
-     
+    printf("Test\n");
+
+    //Printea y escribe en archivo.
+    //writeMessageTxt(10,10); 
+    //writeMessageSHM(10, 10, fileHandler, lines); 
+    /*
     fileHandler = fileSHM; 
     for(int i = 0; i < 82*lines; i++){ 
         if(i%82 == 0){ 
             putchar('\n'); 
         } 
         printf("%c", *(fileHandler+i));         
-    }       
+    } */
 }
