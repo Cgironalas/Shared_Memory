@@ -6,16 +6,11 @@
 
 static int rtrn;
 static struct shmid_ds shmid_ds;
-static int smSize = sizeof(int);
-
-struct Process{
-	void (*test)();
-} process_default = {NULL};
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key, int size){
 	int shmid;
-	if((shmid = shmget(key, smSize, 0666)) < 0){
+	if((shmid = shmget(key, size, 0666)) < 0){
 		return (-1);
 	}
 	return (shmid);
@@ -79,7 +74,7 @@ int main(int argc, char *arcgv[]){
 	int selfishConsecutivesID = getSharedMemorySegment(selfishConsecutivesK, sizeof(int));
 	int finishID = getSharedMemorySegment(finishK, sizeof(int));
 	int writerID = getSharedMemorySegment(writerK, sizeof(int));
-	int processesID = getSharedMemorySegment(processesK, sizeof(int) * 10000 * 4);
+	int processesID = getSharedMemorySegment(processesK, sizeof(int) * 40000);
 
 	//Shared memory location
 	int *shm;
