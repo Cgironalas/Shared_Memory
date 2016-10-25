@@ -8,13 +8,30 @@ static int rtrn;
 static struct shmid_ds shmid_ds;
 static int smSize = sizeof(int);
 
+struct Process{
+	void (*test)();
+} process_default = {NULL};
+
 //Get the ID number of a shared memory segment, needed to get the address
-int getSharedMemorySegment(key_t key){
+int getSharedMemorySegment(key_t key, int size){
 	int shmid;
 	if((shmid = shmget(key, smSize, 0666)) < 0){
 		return (-1);
 	}
 	return (shmid);
+}
+
+char *attachCharSharedMemorySegment(int ID){
+	char *shm;
+    if(ID != -1){
+        if((shm = shmat(ID, NULL, 0)) == (char *) -1){
+            return NULL;
+        }else{
+            return shm;
+        }
+    }else{
+        return NULL;
+    }
 }
 
 //Attach the process to a shared memory segment
@@ -42,7 +59,7 @@ int deleteSharedMemorySegment(int ID){
 	}
 }
 
-int main(int argc, char *arcgv[]){	
+int main(int argc, char *arcgv[]){
 	//Shared Memory keys
 	key_t fullLinesK = 5678;
 	key_t whiteLinesK = 5679;
@@ -52,23 +69,21 @@ int main(int argc, char *arcgv[]){
 	key_t finishK = 5683;
 	key_t writerK = 5684;
 	key_t fileK = 5685;
-	key_t pIdCounterK = 5686;
-	key_t linesK = 5687;
+	key_t processesK = 5686;
 
 	//Shared Memory IDs
-	int fullLinesID = getSharedMemorySegment(fullLinesK);
-	int whiteLinesID = getSharedMemorySegment(whiteLinesK);
-	int readersID = getSharedMemorySegment(readersK);
-	int selfishID = getSharedMemorySegment(selfishK);
-	int selfishConsecutivesID = getSharedMemorySegment(selfishConsecutivesK);
-	int finishID = getSharedMemorySegment(finishK);
-	int writerID = getSharedMemorySegment(writerK);
-	int fileID = getSharedMemorySegment(fileK);
-	int pIdCunterID = getSharedMemorySegment(pIdCounterK);
-	int linesID = getSharedMemorySegment(linesK);
+	int fullLinesID = getSharedMemorySegment(fullLinesK, sizeof(int));
+	int whiteLinesID = getSharedMemorySegment(whiteLinesK, sizeof(int));
+	int readersID = getSharedMemorySegment(readersK, sizeof(int));
+	int selfishID = getSharedMemorySegment(selfishK, sizeof(int));
+	int selfishConsecutivesID = getSharedMemorySegment(selfishConsecutivesK, sizeof(int));
+	int finishID = getSharedMemorySegment(finishK, sizeof(int));
+	int writerID = getSharedMemorySegment(writerK, sizeof(int));
+	int processesID = getSharedMemorySegment(processesK, sizeof(int) * 10000 * 4);
 
 	//Shared memory location
 	int *shm;
+	char *shm2;
 	
 	//Si se consiguio el ID del semaforo se setea el lugar de memoria correspondiente
 	shm = attatchSharedMemorySegment(fullLinesID);
@@ -77,14 +92,6 @@ int main(int argc, char *arcgv[]){
 		deleteSharedMemorySegment(fullLinesID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for FULL_LINES");
-	}
-
-	shm = attatchSharedMemorySegment(whiteLinesID);
-	//printf("White Lines: %d\n", *shm);
-	if(shm != NULL){
-		deleteSharedMemorySegment(whiteLinesID);
-	}else{
-		perror("ERROR: Attaching to the shared memory for WHITE_LINES");	
 	}
 	
 	shm = attatchSharedMemorySegment(readersID);
@@ -127,29 +134,37 @@ int main(int argc, char *arcgv[]){
 		perror("ERROR: Attaching to the shared memory for WRITER");
 	}
 
-	shm = attatchSharedMemorySegment(fileID);
-	//printf("File: %d\n", *shm);
+
+	shm = attatchSharedMemorySegment(whiteLinesID);
+	int lines;
+	//printf("White Lines: %d\n", *shm);
 	if(shm != NULL){
+		lines = (int) *shm;
+		deleteSharedMemorySegment(whiteLinesID);
+	}else{
+		lines = 0;
+		perror("ERROR: Attaching to the shared memory for WHITE_LINES");	
+	}
+
+	int fileID = getSharedMemorySegment(fileK, sizeof(char) * 82 * lines);
+	shm2 = attachCharSharedMemorySegment(fileID);
+	//printf("File: %d\n", *shm);
+	if(shm2 != NULL){
 		deleteSharedMemorySegment(fileID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for FILE");
 	}
 
-	shm = attatchSharedMemorySegment(pIdCunterID);
-	//printf("ID counter: %d\n", *shm);
-	if(shm != NULL){
-		deleteSharedMemorySegment(pIdCunterID);
-	}else{
-		perror("ERROR: Attaching to the shared memory for ID_COUNTER");
-	}
-
-	shm = attatchSharedMemorySegment(linesID);
+	shm = attatchSharedMemorySegment(processesID);
 	//printf("Lines in shared memory file: %d\n", *shm);
 	if(shm != NULL){
-		deleteSharedMemorySegment(linesID);
+		deleteSharedMemorySegment(processesID);
 	}else{
-		perror("ERROR: Attaching to the shared memory for LINES");
+		perror("ERROR: Attaching to the shared memory for PROCESSES");
 	}
+
+	int remove_confirm = remove("results.txt");
+    if (remove_confirm != 0) { printf("ERROR: unable to delete the file"); }
 	
 	exit(0);
 }
