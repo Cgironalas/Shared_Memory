@@ -1,8 +1,5 @@
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 40; Line: 1
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 42; Line: 2
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 44; Line: 3
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 46; Line: 4
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 48; Line: 5
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 50; Line: 6
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 52; Line: 7
-WRITER: PID: 0; Hour: 17, Min: 18, Sec: 54; Line: 8
+WRITER: PID: 1; Hour: 17, Min: 41, Sec: 25; Line: 1
+WRITER: PID: 5; Hour: 17, Min: 41, Sec: 27; Line: 2
+WRITER: PID: 1; Hour: 17, Min: 41, Sec: 29; Line: 3
+WRITER: PID: 5; Hour: 17, Min: 41, Sec: 31; Line: 4
+WRITER: PID: 1; Hour: 17, Min: 41, Sec: 33; Line: 5
