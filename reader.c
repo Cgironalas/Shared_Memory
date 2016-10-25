@@ -20,7 +20,66 @@ struct Process{
     int block;
     int type;
     void (*function)();
-} process_dafault = {0, 0, NULL};
+} process_dafault = {0, 0, 0,  NULL};
+
+
+void writeLogRead (int pid, int line, char buffed[]) {
+    FILE *results_file;
+
+    char filename[] = "log.txt";
+    results_file = fopen(filename, "a");
+    
+    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+
+
+    int timestamp[6];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
+    
+    fprintf(results_file, "Read: %s\n; PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", buffed, pid, timestamp[3], timestamp[4], timestamp[5], line);  
+    fclose(results_file);
+}
+
+void readLine (int pid, int line) {
+    FILE *results_file;
+    
+    char filename[] = "results.txt";
+    
+    results_file = fopen(filename, "r");
+    
+    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    int timestamp[6];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
+
+    int count = 0;
+    char buf[256];
+
+    while (fgets(buf, sizeof(buf), results_file)){
+        if (count == line){ 
+            writeLogRead(pid, line, buf);
+            printf("%s\n", buf);
+        }
+        count++;
+    }
+
+    if (count <= line){
+        printf("ERROR: Couldn't access such line");
+    }
+
+    fclose(results_file);
+}
 
 
 //Get the ID number of a shared memory segment, needed to get the address
@@ -143,7 +202,7 @@ int main(int argc, char *argv[]){
     writerSHM = attatchSharedMemorySegment(writerK);
     fileSHM = attatchSharedMemorySegment(fileK);
     
-    linesSHM = attatchSharedMemorySegment(linesK);
+    //linesSHM = attatchSharedMemorySegment(linesK);
 
     struct Process process;
 
@@ -151,4 +210,6 @@ int main(int argc, char *argv[]){
         pthread_create(&reader, NULL, beginReading, &process);
         pthread_join(reader, NULL);
     }
+
+    readLine(2, 20);
 }

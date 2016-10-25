@@ -43,12 +43,16 @@ int *attachSharedMemorySegment(key_t key, int size){
 
 void write(int lines) {
     FILE * init;
+    FILE * log;
     char buff[256];
     init = fopen("results.txt","w");
+    log = fopen("log.txt","w");
+
     for (int i= 0; i< lines-1; i++){
         fprintf(init,"%s\n",buff);
     }
     fclose(init);
+    fclose(log);
 }
 
 int main(int argc, char *argv[]){

@@ -121,7 +121,7 @@ void writeLogTxt (int pid, int line) {
 
     timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
     
-    fprintf(results_file, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);  
+    fprintf(results_file, "PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);  
     fclose(results_file);
 }
 
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]){
     writerSHM = attachSharedMemorySegment(writerK);
     fileSHM = attachSharedMemorySegment(fileK);
     
-    linesSHM = attachSharedMemorySegment(linesK);
+    //linesSHM = attachSharedMemorySegment(linesK);
 
     //Need to attach the process to Shared Memory segments before creating child threads
     struct Process process = process_default;
