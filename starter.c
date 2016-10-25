@@ -4,19 +4,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int smSize = sizeof(int);
-
-int createSharedMemorySegment(key_t key){
+int createSharedMemorySegment(key_t key, int size){
 	int shmid;
-	if((shmid = shmget(key, smSize, IPC_CREAT | IPC_EXCL | 0666)) < 0){
+	if((shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | 0666)) < 0){
 		return (-1);
 	}
 	return (shmid);
 }
 
-int *attachhSharedMemorySegment(key_t key){
+char *attachCharSharedMemorySegment(key_t key, int size){
+	char *shm;
+	int ID = createSharedMemorySegment(key, size);
+	if(ID != -1){
+		if((shm = shmat(ID, NULL, 0)) == (char *) -1){
+			return NULL;
+		}else{
+			return shm;
+		}
+	}else{
+		return NULL;
+	}
+}
+
+int *attachSharedMemorySegment(key_t key, int size){
     int *shm;
-    int ID = createSharedMemorySegment(key);
+    int ID = createSharedMemorySegment(key, size);
     if(ID != -1){
         if((shm = shmat(ID, NULL, 0)) == (int *) -1){
             return NULL;
@@ -24,8 +36,19 @@ int *attachhSharedMemorySegment(key_t key){
             return shm;
         }
     }else{
+    	printf("D\n");
         return NULL;
     }
+}
+
+void write(int lines) {
+    FILE * init;
+    char buff[256];
+    init = fopen("results.txt","w");
+    for (int i= 0; i< lines-1; i++){
+        fprintf(init,"%s\n",buff);
+    }
+    fclose(init);
 }
 
 int main(int argc, char *argv[]){
@@ -35,11 +58,12 @@ int main(int argc, char *argv[]){
        	printf("\nERROR: Only 1 parameter expected, with the shared memory size. Program ended.\n\n");
     	return 0;
     }
-
     if (sscanf (argv[1], "%i", &lines)!=1) {
         printf ("\nERROR: <shared_mem_size> not an integer\n\n");
         return 0;
     }
+    write(lines);
+	
 
 	//Shared Memory keys
 	key_t fullLinesK = 5678;
@@ -50,101 +74,96 @@ int main(int argc, char *argv[]){
 	key_t finishK = 5683;
 	key_t writerK = 5684;
 	key_t fileK = 5685;
-	key_t pIdCounterK = 5686;
-	key_t linesK = 5687;
+	key_t processesK = 5686;
 
+	char *fileSHM, *charHandler;
+	
 	int *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *selfishConsecutivesSHM,
-	*finishSHM, *writerSHM, *fileSHM, *pIdCounterSHM, *linesSHM;
-	int *s;
+	*finishSHM, *writerSHM, *processSHM, *intHandler;
 
-    fullLinesSHM = attachhSharedMemorySegment(fullLinesK);
+    fullLinesSHM = attachSharedMemorySegment(fullLinesK, sizeof(int));
     if(fullLinesSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for FULL_LINES.");
     	exit(1);
 	}else{
-		s = fullLinesSHM;
-		*s = 0;
+		intHandler = fullLinesSHM;
+		*intHandler = 0;
 	}
 
-    whiteLinesSHM = attachhSharedMemorySegment(whiteLinesK);
+    whiteLinesSHM = attachSharedMemorySegment(whiteLinesK, sizeof(int));
     if(whiteLinesSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for WHITE_LINES.");
     	exit(1);
 	}else{
-		s = whiteLinesSHM;
-		*s = lines;
+		intHandler = whiteLinesSHM;
+		*intHandler = lines;
 	}
 
-    readersSHM = attachhSharedMemorySegment(readersK);
+    readersSHM = attachSharedMemorySegment(readersK, sizeof(int));
     if(readersSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for READERS.");
     	exit(1);
 	}else{
-		s = readersSHM;
-		*s = 0;
+		intHandler = readersSHM;
+		*intHandler = 0;
 	}
 
-    selfishSHM = attachhSharedMemorySegment(selfishK);
+    selfishSHM = attachSharedMemorySegment(selfishK, sizeof(int));
     if(selfishSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for SELFISH.");
     	exit(1);
 	}else{
-		s = selfishSHM;
-		*s = 0;
+		intHandler = selfishSHM;
+		*intHandler = 0;
 	}
 
-    selfishConsecutivesSHM = attachhSharedMemorySegment(selfishConsecutivesK);
+    selfishConsecutivesSHM = attachSharedMemorySegment(selfishConsecutivesK, sizeof(int));
     if(selfishConsecutivesSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for SELFISH_CONSECUTIVES.");
     	exit(1);
 	}else{
-		s = selfishConsecutivesSHM;
-		*s = 0;
+		intHandler = selfishConsecutivesSHM;
+		*intHandler = 0;
 	}
 
-    finishSHM = attachhSharedMemorySegment(finishK);
+    finishSHM = attachSharedMemorySegment(finishK, sizeof(int));
     if(finishSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for FINISH.");
     	exit(1);
 	}else{
-		s = finishSHM;
-		*s = 0;
+		intHandler = finishSHM;
+		*intHandler = 0;
 	}
 
-    writerSHM = attachhSharedMemorySegment(writerK);
+    writerSHM = attachSharedMemorySegment(writerK, sizeof(int));
     if(writerSHM == NULL){
     	perror("ERROR: Couldn't create shared memory for WRITER.");
     	exit(1);
 	}else{
-		s = writerSHM;
-		*s = 0;
+		intHandler = writerSHM;
+		*intHandler = 0;
 	}
 
-    fileSHM = attachhSharedMemorySegment(fileK);
+    fileSHM = attachCharSharedMemorySegment(fileK, (int) sizeof(char) * 82 * lines);
    	if(fileSHM == NULL){
    		perror("ERROR: Couldn't create shared memory for FILE.");
     	exit(1);
 	}else{
-		s = fileSHM;
-		*s = 0;
+		charHandler = fileSHM;
+		for(int i = 0; i < sizeof(char) * 82 * lines; i++){
+			*charHandler++ = 0;
+		}
 	}
 
-   	pIdCounterSHM = attachhSharedMemorySegment(pIdCounterK);
-    if(pIdCounterSHM == NULL){
-    	perror("ERROR: Couldn't create shared memory for ID_COUNTER.");
+	processSHM = attachSharedMemorySegment(processesK, (int) sizeof(int) * 40000);		
+	if(processSHM  == NULL){
+		perror("ERROR: Couldn't create shared memory for PROCESSES.");
     	exit(1);
 	}else{
-		s = pIdCounterSHM;
-		*s = 0;
-	}
-
-    linesSHM = attachhSharedMemorySegment(linesK);
-	if(linesSHM == NULL){
-		perror("ERROR: Couldn't create shared memory for LINES.");
-    	exit(1);
-	}else{
-		s = linesSHM;
-		*s = 0;
+		intHandler = processSHM;
+		for(int i = 0; i < 40000; i++){
+			intHandler[i] = 0;
+		}
 	}
 
 	printf("All shared memory spaces successfully created.\n");

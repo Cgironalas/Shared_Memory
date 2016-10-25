@@ -15,8 +15,9 @@ struct Process{
     int pId;
     int block;
     int type;
+    int line;
     void (*function)();
-} process_default = {0, 0, 0, NULL}; 
+} process_default = {0, 0, 0, 0, NULL}; 
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key){
