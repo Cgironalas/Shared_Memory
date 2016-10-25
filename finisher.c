@@ -65,6 +65,7 @@ int main(int argc, char *arcgv[]){
 	key_t writerK = 5684;
 	key_t fileK = 5685;
 	key_t processesK = 5686;
+	key_t linesK = 5687;
 
 	//Shared Memory IDs
 	int fullLinesID = getSharedMemorySegment(fullLinesK, sizeof(int));
@@ -74,19 +75,40 @@ int main(int argc, char *arcgv[]){
 	int selfishConsecutivesID = getSharedMemorySegment(selfishConsecutivesK, sizeof(int));
 	int finishID = getSharedMemorySegment(finishK, sizeof(int));
 	int writerID = getSharedMemorySegment(writerK, sizeof(int));
-	int processesID = getSharedMemorySegment(processesK, sizeof(int) * 40000);
+	int processesID = getSharedMemorySegment(processesK, sizeof(int) * 40001);
+	int linesID = getSharedMemorySegment(linesK, sizeof(int));
 
 	//Shared memory location
 	int *shm;
 	char *shm2;
+
+	int lines;
 	
 	//Si se consiguio el ID del semaforo se setea el lugar de memoria correspondiente
+	shm = attatchSharedMemorySegment(linesID);
+	//printf("Cantidad de lineas del archivo: %d\n", *shm);
+	if(shm != NULL){
+		lines = *shm;
+		deleteSharedMemorySegment(linesID);
+	}else{
+		lines = 0;
+		perror("ERROR: Attaching to the shared memory for FULL_LINES");
+	}
+
 	shm = attatchSharedMemorySegment(fullLinesID);
 	//printf("Full Lines: %d\n", *shm);
 	if(shm != NULL){
 		deleteSharedMemorySegment(fullLinesID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for FULL_LINES");
+	}
+
+	shm = attatchSharedMemorySegment(whiteLinesID);
+	//printf("White Lines: %d\n", *shm);
+	if(shm != NULL){
+		deleteSharedMemorySegment(whiteLinesID);
+	}else{
+		perror("ERROR: Attaching to the shared memory for WHITE_LINES");	
 	}
 	
 	shm = attatchSharedMemorySegment(readersID);
@@ -127,18 +149,6 @@ int main(int argc, char *arcgv[]){
 		deleteSharedMemorySegment(writerID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for WRITER");
-	}
-
-
-	shm = attatchSharedMemorySegment(whiteLinesID);
-	int lines;
-	//printf("White Lines: %d\n", *shm);
-	if(shm != NULL){
-		lines = (int) *shm;
-		deleteSharedMemorySegment(whiteLinesID);
-	}else{
-		lines = 0;
-		perror("ERROR: Attaching to the shared memory for WHITE_LINES");	
 	}
 
 	int fileID = getSharedMemorySegment(fileK, sizeof(char) * 82 * lines);

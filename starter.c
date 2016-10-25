@@ -79,11 +79,21 @@ int main(int argc, char *argv[]){
 	key_t writerK = 5684;
 	key_t fileK = 5685;
 	key_t processesK = 5686;
+	key_t linesK = 5687;
 
 	char *fileSHM, *charHandler;
 	
 	int *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *selfishConsecutivesSHM,
-	*finishSHM, *writerSHM, *processSHM, *intHandler;
+	*finishSHM, *writerSHM, *processSHM, *linesSHM, *intHandler;
+
+	linesSHM = attachSharedMemorySegment(linesK, sizeof(int));
+	if(linesSHM == NULL){
+		perror("ERROR: Couldn't create shared memory for LINES.");
+    	exit(1);
+	}else{
+		intHandler = linesSHM;
+		*intHandler = lines;
+	}
 
     fullLinesSHM = attachSharedMemorySegment(fullLinesK, sizeof(int));
     if(fullLinesSHM == NULL){
@@ -159,13 +169,13 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	processSHM = attachSharedMemorySegment(processesK, (int) sizeof(int) * 40000);		
+	processSHM = attachSharedMemorySegment(processesK, (int) sizeof(int) * 40001);		
 	if(processSHM  == NULL){
 		perror("ERROR: Couldn't create shared memory for PROCESSES.");
     	exit(1);
 	}else{
 		intHandler = processSHM;
-		for(int i = 0; i < 40000; i++){
+		for(int i = 0; i < 40001; i++){
 			intHandler[i] = 0;
 		}
 	}
