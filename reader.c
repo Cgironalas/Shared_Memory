@@ -20,7 +20,7 @@ struct Process{
     int block;
     int type;
     void (*function)();
-} process_dafault = {0, 0, 0,  NULL};
+} process_default = {0, 0, 0,  NULL};
 
 
 void writeLogRead (int pid, int line, char buffed[]) {
@@ -35,13 +35,13 @@ void writeLogRead (int pid, int line, char buffed[]) {
     struct tm * timeinfo;
 
 
-    int timestamp[6];
+    int timestamp[3];
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
 
-    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
+    timestamp[0] = timeinfo->tm_hour; timestamp[1] = timeinfo->tm_min; timestamp[2] = timeinfo->tm_sec;
     
-    fprintf(results_file, "Read: %s\n; PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", buffed, pid, timestamp[3], timestamp[4], timestamp[5], line);  
+    fprintf(results_file, "READER: PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i; Read: %s", pid, timestamp[0], timestamp[1], timestamp[2], line, buffed);  
     fclose(results_file);
 }
 

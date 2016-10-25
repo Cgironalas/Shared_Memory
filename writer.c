@@ -59,6 +59,27 @@ void v(int s, struct Process p ) {
     s += 1;
 }
 
+void writeLogTxt (int pid, int line) {
+    FILE *results_file;
+
+    char filename[] = "log.txt";
+    results_file = fopen(filename, "a");
+    
+    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    int timestamp[3];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    timestamp[0] = timeinfo->tm_hour; timestamp[1] = timeinfo->tm_min; timestamp[2] = timeinfo->tm_sec;
+    
+    fprintf(results_file, "WRITER: PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], line);  
+    fclose(results_file);
+}
+
 void writeMessageTxt (int pid, int line) {
     FILE *results_file;
     FILE *temp;
@@ -99,30 +120,10 @@ void writeMessageTxt (int pid, int line) {
     if (remove_confirm != 0) { printf("ERROR: unable to delete the file"); }
     int rename_confirm = rename(tempfilename, filename);
     if (rename_confirm != 0) { printf("ERROR: unable to rename the file"); }
-   
+    
     fclose(results_file);
     fclose(temp);
-}
-
-void writeLogTxt (int pid, int line) {
-    FILE *results_file;
-
-    char filename[] = "log.txt";
-    results_file = fopen(filename, "a");
-    
-    if (results_file == NULL) { printf("ERROR: Can't open results file\n"); }
-    
-    time_t rawtime;
-    struct tm * timeinfo;
-
-    int timestamp[6];
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
-
-    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
-    
-    fprintf(results_file, "PID: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);  
-    fclose(results_file);
+    writeLogTxt(pid, line);
 }
 
 void *beginReading(void* data){
