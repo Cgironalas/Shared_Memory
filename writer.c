@@ -201,7 +201,6 @@ int main(int argc, char *argv[]){
     key_t processesK = 5686;
     key_t linesK = 5687;
 
-    //Shared memory locations
     //Shared memory locations 
     char *fileSHM, *fileHandler; 
  
@@ -271,7 +270,7 @@ int main(int argc, char *argv[]){
         exit(1); 
     }
 
-    processesSHM = attachSharedMemorySegment(processesK, sizeof(int) * 40000); 
+    processesSHM = attachSharedMemorySegment(processesK, sizeof(int) * 40001); 
     if(processesSHM  == NULL){ 
         perror("ERROR: Couldn't create shared memory for PROCESSES."); 
         exit(1); 
