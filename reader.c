@@ -62,11 +62,11 @@ void readLine (int pid, int line) {
     while (fgets(buf, sizeof(buf), results_file)){
 
         if (count >= line && strcmp(buf,"\n") != 0){ 
+            line = count+1;
             writeLogRead(pid, line, buf);
             printf("%s\n", buf);
 
             count++;
-            line = count;
             foundsomething = 1;
             break;
         }
@@ -74,32 +74,13 @@ void readLine (int pid, int line) {
     }
 
     fclose(results_file);
-    if (count < line){ 
-        printf("ERROR: Couldn't access such line\n"); 
+
+    if (count < line){ printf("ERROR: Couldn't access such line\n"); }
+    
+    if (foundsomething == 0){
+        readLine (pid, 0);
     }
-
-    else {
-        int newline = 0;
-        results_file = fopen(filename, "r");   
-        if (foundsomething == 0) {
-            count = 0;
-            while (fgets(buf, sizeof(buf), results_file)){
-
-                if (count >= newline && strcmp(buf,"\n") != 0){ 
-                    writeLogRead(pid, line, buf);
-                    printf("%s\n", buf);
-
-                    count++;
-                    line = count;
-                    break;
-                }
-                count++;
-            }
-        }
-        fclose(results_file);    
-    }    
 }
-
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key){

@@ -48,7 +48,7 @@ void write(int lines) {
     init = fopen("results.txt","w");
     log = fopen("log.txt","w");
 
-    for (int i= 0; i< lines-1; i++){
+    for (int i= 0; i<= lines; i++){
         fprintf(init,"%s\n",buff);
     }
     fclose(init);

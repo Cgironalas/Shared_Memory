@@ -1,3 +1,4 @@
+PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 12, Min: 41, Sec: 48; Line: 1
 
 
 
@@ -7,23 +8,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 20
-PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 21
-PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 22
-PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 42, Sec: 1; Line: 23
-
-
-
-
-
+PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 12, Min: 41, Sec: 48; Line: 11
+PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 12, Min: 41, Sec: 48; Line: 12
+PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 12, Min: 41, Sec: 48; Line: 13
+PID: 10; Day: 25, Month: 10, Year: 2016; Hour: 12, Min: 41, Sec: 48; Line: 14
