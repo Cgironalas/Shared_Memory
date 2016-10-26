@@ -6,6 +6,35 @@
 
 static int lines;
 
+void printCurrentFile(char *fileHandler) {
+    for(int i = 0; i < 82*lines; i++){ 
+        if(i%82 == 0) { 
+            putchar('\n'); 
+        } 
+        printf("%c", *(fileHandler+i));         
+    }
+}
+
+void printCurrentProcesses(int *processesHandler, int type) {
+    for(int i = 1; i < 40001; i += 4) {
+        if(processesHandler[i + 1] == type) {
+            switch(processesHandler[i + 2]) {
+                case 1:
+                    printf("PID: %i, State: %s\n", processesHandler[i], "ACTIVE");
+                    break;
+                case 2:
+                    printf("PID: %i, State: %s\n", processesHandler[i], "SLEEPING");
+                    break;
+                case 3:
+                    printf("PID: %i, State: %s\n", processesHandler[i], "BLOCKED");
+                    break;
+                default:
+                    break;
+            }
+        } 
+    }
+}
+
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key, int size){
     int shmid;
@@ -46,9 +75,9 @@ int *attachSharedMemorySegment(key_t key, int size){
 
 int main(int argc, char *argv[]){
 
-	//Input del usuario.
-	char dump[100];
-	int modo;
+    //Input del usuario.
+    char dump[100];
+    int modo;
 
     //Shared memory keys
     key_t readersK = 5680;
@@ -105,63 +134,67 @@ int main(int argc, char *argv[]){
         exit(1); 
     }
 
-	printf("\nWelcome to the Spy\n\n");
+    printf("\nWelcome to the Spy\n\n");
     
-	while (1) {
-		printf("Things you can do:\n\n");
-		printf("\t 1. Spy the current file\n\n");
-		printf("\t 2. Spy the Writers\n\n");
-		printf("\t 3. Spy the Readers\n\n");
-		printf("\t 4. Spy the Selfish Readers\n\n");
+    while (1) {
+        printf("Things you can do:\n\n");
+        printf("\t 1. Spy the current file\n\n");
+        printf("\t 2. Spy the Writers\n\n");
+        printf("\t 3. Spy the Readers\n\n");
+        printf("\t 4. Spy the Selfish Readers\n\n");
 
-		printf("\t 5. Cancel & exit.\n\n");
+        printf("\t 5. Cancel & exit.\n\n");
 
-		if (!fgets(dump, sizeof dump, stdin)){
-			printf("\nERROR retrieving input.\n");
-		}
+        if (!fgets(dump, sizeof dump, stdin)){
+            printf("\nERROR retrieving input.\n");
+        }
 
-		else{
-  			char *chk;
-    		
-    		if ((int) strtol(dump, (char **)NULL, 10)) {
-    			modo = (int) strtol(dump, (char **)NULL, 10);
+        else{
+            char *chk;
+            
+            if ((int) strtol(dump, (char **)NULL, 10)) {
+                modo = (int) strtol(dump, (char **)NULL, 10);
 
-    			if (modo > 0 && modo < 6) {
+                if (modo > 0 && modo < 6) {
                  
-    				//Cases
-    				switch(modo) {
-    					case 1:
-    						printf("\n This is the current file:\n\n");
-                            // Code here
+                    //Cases
+                    switch(modo) {
+                        case 1:
+                            printf("\n This is the current file:\n\n");
+                            fileHandler = fileSHM;
+                            printCurrentFile(fileHandler);
                             break;
-    					case 2: 
-    						printf("\n These are the Writers\n\n");
-                            // Code here
+                        case 2: 
+                            printf("\n These are the Writers\n\n");
+                            processesHandler = processesSHM;
+                            printCurrentProcesses(processesHandler, 1);
                             break;
-    					case 3:
-    						printf("\n These are the Readers\n\n");
-    						// Code here
-    						break;
-    					case 4:
-    						printf("\n These are the Selfish Readers\n\n");
-    						// Code here
-    						break;
-    					case 5:
-    						printf("\n Program finished\n\n");
-    						exit(1);
-    					default:
-    						break;
-    				}	
-    				//break;
-    			}
-    		}
-    		else {
-    			printf("\n\nEnter a valid option.\n\n"); 
-    		}
+                        case 3:
+                            printf("\n These are the Readers\n\n");
+                            processesHandler = processesSHM;
+                            printCurrentProcesses(processesHandler, 2);
+                            break;
+                        case 4:
+                            printf("\n These are the Selfish Readers\n\n");
+                            processesHandler = processesSHM;
+                            printCurrentProcesses(processesHandler, 3);
+                            break;
+                        case 5:
+                            printf("\n Program finished\n\n");
+                            exit(1);
+                        default:
+                            break;
+                    }   
+                    //break;
+                }
+            }
+            else {
+                printf("\n\nEnter a valid option.\n\n"); 
+            }
 
-		}
-	}
+        }
+    }
 
-	return 0;
+    return 0;
 
 }
