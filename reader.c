@@ -33,7 +33,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
-static sem_t *erika, *marin;
+static sem_t *mainSem, *readerSem;
 
 struct Process{
     int pId;
@@ -158,13 +158,13 @@ void *beginReading(void *data){
             break;
         }else{            
             if(fullHandler[0] > 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
-                //sem_wait(marin);
+                //sem_wait(readerSem);
                 readersHandler[0] += 1;
                 //if(readersHandler[0] == 1){
-                //    sem_post(marin);
-                    sem_wait(erika);
+                //    sem_post(readerSem);
+                    sem_wait(mainSem);
                 //}else{
-                //    sem_post(marin);
+                //    sem_post(readerSem);
                 //}
                 selfishConsecutivesHandler[0] = 0;
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
@@ -177,13 +177,13 @@ void *beginReading(void *data){
                 selfishHandler[0] = 0;
                 writerHandler[0] = 0;
 
-                //sem_wait(marin);
+                //sem_wait(readerSem);
                 readersHandler[0] -= 1;
                 //if(readersHandler[0] == 0){
-                //    sem_post(marin);
-                    sem_post(erika);
+                //    sem_post(readerSem);
+                    sem_post(mainSem);
                 //}else{
-                //    sem_post(marin);
+                //    sem_post(readerSem);
                 //}
                 sleep(sleep_time);
 
@@ -196,8 +196,8 @@ void *beginReading(void *data){
 
 
 int main(int argc, char *argv[]){
-    erika = sem_open("/erika", 0644);
-    //marin = sem_open("/marin", 0644);
+    mainSem = sem_open("/mainSem", 0644);
+    readerSem = sem_open("/readerSem", 0644);
     if( argc != 4 ) {
        	printf("\nERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;

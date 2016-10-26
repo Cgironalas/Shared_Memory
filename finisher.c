@@ -8,8 +8,8 @@
 
 static int rtrn;
 static struct shmid_ds shmid_ds;
-static sem_t *erika;
-//static sem_t *marin;
+static sem_t *mainSem;
+static sem_t *readerSem;
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key, int size){
@@ -59,11 +59,11 @@ int deleteSharedMemorySegment(int ID){
 }
 
 int main(int argc, char *arcgv[]){
-	erika = sem_open("/erika", 0644);
-    //marin = sem_open("/marin", 0644);
+	mainSem = sem_open("/mainSem", 0644);
+    readerSem = sem_open("/readerSem", 0644);
 
-    sem_unlink("/erika");
-    //sem_destroy(marin);
+    sem_unlink("/mainSem");
+    sem_unlink("/readerSem");
 
 	//Shared Memory keys
 	key_t fullLinesK = 5678;

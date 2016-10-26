@@ -30,7 +30,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
-static sem_t *erika;
+static sem_t *mainSem;
 
 struct Process{
     int pId;
@@ -177,7 +177,7 @@ void *beginSteal(void *data){
         }else{
             if(selfishConsecutivesHandler[0] < 3 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
                 printf("Test\n");
-                sem_wait(erika);
+                sem_wait(mainSem);
                 selfishHandler[0] = 1;
                 selfishConsecutivesHandler[0] += 1;
                 processesHandler[(process->pId * 4) + 3] = 1;
@@ -197,7 +197,7 @@ void *beginSteal(void *data){
                 fullHandler[0] -= 1;
                 selfishHandler[0] = 0;
 
-                sem_post(erika);
+                sem_post(mainSem);
                 sleep(sleep_time);
             }else{
                 processesHandler[(process->pId * 4) + 3] = 3;
@@ -208,7 +208,7 @@ void *beginSteal(void *data){
 }
 
 int main(int argc, char *argv[]){
-    erika = sem_open("/erika", 0644);
+    mainSem = sem_open("/mainSem", 0644);
     if( argc != 4 ) {
        	printf("ERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;

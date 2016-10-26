@@ -1,61 +1,31 @@
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 23; Line: 0
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 24; Line: 1
-WRITER: PID: 9; Hour: 21, Min: 39, Sec: 25; Line: 2
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 29; Line: 3
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 30; Line: 4
-WRITER: PID: 9; Hour: 21, Min: 39, Sec: 31; Line: 5
-READER: PID: 13; Hour: 21, Min: 39, Sec: 32; Line: 1; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 23; Line: 0
-READER: PID: 17; Hour: 21, Min: 39, Sec: 33; Line: 1; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 23; Line: 0
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 35; Line: 6
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 36; Line: 7
-WRITER: PID: 9; Hour: 21, Min: 39, Sec: 37; Line: 8
-READER: PID: 13; Hour: 21, Min: 39, Sec: 38; Line: 2; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 24; Line: 1
-READER: PID: 17; Hour: 21, Min: 39, Sec: 39; Line: 2; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 24; Line: 1
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 41; Line: 9
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 42; Line: 10
-WRITER: PID: 9; Hour: 21, Min: 39, Sec: 43; Line: 11
-READER: PID: 17; Hour: 21, Min: 39, Sec: 44; Line: 3; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 25; Line: 2
-SELFISH_READER: PID: 21; Hour: 21, Min: 39, Sec: 45; Line: 3; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 29; Line: 3
-READER: PID: 13; Hour: 21, Min: 39, Sec: 46; Line: 3; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 25; Line: 2
-SELFISH_READER: PID: 25; Hour: 21, Min: 39, Sec: 47; Line: 6; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 35; Line: 6
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 48; Line: 12
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 49; Line: 13
-SELFISH_READER: PID: 21; Hour: 21, Min: 39, Sec: 50; Line: 10; Stolen: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 42; Line: 10
-READER: PID: 13; Hour: 21, Min: 39, Sec: 51; Line: 5; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 30; Line: 4
-WRITER: PID: 9; Hour: 21, Min: 39, Sec: 53; Line: 14
-WRITER: PID: 1; Hour: 21, Min: 39, Sec: 54; Line: 15
-WRITER: PID: 5; Hour: 21, Min: 39, Sec: 55; Line: 16
-READER: PID: 13; Hour: 21, Min: 39, Sec: 56; Line: 6; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 31; Line: 5
-READER: PID: 17; Hour: 21, Min: 39, Sec: 57; Line: 5; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 30; Line: 4
-SELFISH_READER: PID: 21; Hour: 21, Min: 39, Sec: 58; Line: 14; Stolen: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 53; Line: 14
-SELFISH_READER: PID: 25; Hour: 21, Min: 39, Sec: 59; Line: 15; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 54; Line: 15
-READER: PID: 13; Hour: 21, Min: 40, Sec: 1; Line: 8; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 36; Line: 7
-READER: PID: 17; Hour: 21, Min: 40, Sec: 2; Line: 6; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 31; Line: 5
-WRITER: PID: 1; Hour: 21, Min: 40, Sec: 3; Line: 15
-SELFISH_READER: PID: 21; Hour: 21, Min: 40, Sec: 4; Line: 7; Stolen: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 36; Line: 7
-READER: PID: 13; Hour: 21, Min: 40, Sec: 6; Line: 9; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 37; Line: 8
-WRITER: PID: 9; Hour: 21, Min: 40, Sec: 7; Line: 14
-WRITER: PID: 5; Hour: 21, Min: 40, Sec: 8; Line: 17
-WRITER: PID: 1; Hour: 21, Min: 40, Sec: 9; Line: 18
-SELFISH_READER: PID: 25; Hour: 21, Min: 40, Sec: 10; Line: 15; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 40, Sec: 3; Line: 15
-READER: PID: 13; Hour: 21, Min: 40, Sec: 11; Line: 10; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 41; Line: 9
-WRITER: PID: 9; Hour: 21, Min: 40, Sec: 13; Line: 15
-WRITER: PID: 5; Hour: 21, Min: 40, Sec: 14; Line: 19
-WRITER: PID: 1; Hour: 21, Min: 40, Sec: 15; Line: 3
-READER: PID: 13; Hour: 21, Min: 40, Sec: 16; Line: 12; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 43; Line: 11
-SELFISH_READER: PID: 21; Hour: 21, Min: 40, Sec: 17; Line: 11; Stolen: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 43; Line: 11
-SELFISH_READER: PID: 25; Hour: 21, Min: 40, Sec: 18; Line: 18; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 40, Sec: 9; Line: 18
-WRITER: PID: 9; Hour: 21, Min: 40, Sec: 19; Line: 18
-WRITER: PID: 5; Hour: 21, Min: 40, Sec: 20; Line: 6
-WRITER: PID: 1; Hour: 21, Min: 40, Sec: 21; Line: 7
-SELFISH_READER: PID: 21; Hour: 21, Min: 40, Sec: 22; Line: 9; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 41; Line: 9
-SELFISH_READER: PID: 25; Hour: 21, Min: 40, Sec: 23; Line: 12; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 48; Line: 12
-READER: PID: 13; Hour: 21, Min: 40, Sec: 24; Line: 14; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 49; Line: 13
-READER: PID: 17; Hour: 21, Min: 40, Sec: 25; Line: 7; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 40, Sec: 20; Line: 6
-WRITER: PID: 9; Hour: 21, Min: 40, Sec: 26; Line: 9
-WRITER: PID: 1; Hour: 21, Min: 40, Sec: 27; Line: 10
-SELFISH_READER: PID: 25; Hour: 21, Min: 40, Sec: 28; Line: 5; Stolen: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 31; Line: 5
-READER: PID: 13; Hour: 21, Min: 40, Sec: 29; Line: 15; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 40, Sec: 7; Line: 14
-WRITER: PID: 5; Hour: 21, Min: 40, Sec: 30; Line: 11
-SELFISH_READER: PID: 21; Hour: 21, Min: 40, Sec: 31; Line: 7; Stolen: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 40, Sec: 21; Line: 7
-READER: PID: 17; Hour: 21, Min: 40, Sec: 32; Line: 9; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 39, Sec: 37; Line: 8
+WRITER: PID: 1; Hour: 21, Min: 48, Sec: 59; Line: 0
+WRITER: PID: 9; Hour: 21, Min: 49, Sec: 0; Line: 1
+WRITER: PID: 5; Hour: 21, Min: 49, Sec: 1; Line: 2
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 3; Line: 3
+WRITER: PID: 9; Hour: 21, Min: 49, Sec: 4; Line: 4
+READER: PID: 17; Hour: 21, Min: 49, Sec: 5; Line: 1; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 48, Sec: 59; Line: 0
+READER: PID: 13; Hour: 21, Min: 49, Sec: 6; Line: 1; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 48, Sec: 59; Line: 0
+READER: PID: 21; Hour: 21, Min: 49, Sec: 7; Line: 1; Read: PID: 1; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 48, Sec: 59; Line: 0
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 8; Line: 5
+WRITER: PID: 9; Hour: 21, Min: 49, Sec: 9; Line: 6
+WRITER: PID: 33; Hour: 21, Min: 49, Sec: 10; Line: 7
+WRITER: PID: 25; Hour: 21, Min: 49, Sec: 11; Line: 8
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 12; Line: 9
+READER: PID: 13; Hour: 21, Min: 49, Sec: 13; Line: 2; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 0; Line: 1
+READER: PID: 17; Hour: 21, Min: 49, Sec: 14; Line: 2; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 0; Line: 1
+WRITER: PID: 29; Hour: 21, Min: 49, Sec: 15; Line: 10
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 16; Line: 11
+WRITER: PID: 25; Hour: 21, Min: 49, Sec: 17; Line: 12
+READER: PID: 21; Hour: 21, Min: 49, Sec: 18; Line: 2; Read: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 0; Line: 1
+WRITER: PID: 33; Hour: 21, Min: 49, Sec: 19; Line: 13
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 20; Line: 14
+WRITER: PID: 29; Hour: 21, Min: 49, Sec: 21; Line: 15
+SELFISH_READER: PID: 41; Hour: 21, Min: 49, Sec: 22; Line: 4; Stolen: PID: 9; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 4; Line: 4
+WRITER: PID: 25; Hour: 21, Min: 49, Sec: 23; Line: 16
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 24; Line: 17
+WRITER: PID: 33; Hour: 21, Min: 49, Sec: 25; Line: 18
+READER: PID: 17; Hour: 21, Min: 49, Sec: 26; Line: 3; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 1; Line: 2
+WRITER: PID: 5; Hour: 21, Min: 49, Sec: 27; Line: 4
+WRITER: PID: 1; Hour: 21, Min: 49, Sec: 28; Line: 19
+READER: PID: 13; Hour: 21, Min: 49, Sec: 29; Line: 3; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 1; Line: 2
+READER: PID: 21; Hour: 21, Min: 49, Sec: 30; Line: 3; Read: PID: 5; Day: 25, Month: 10, Year: 2016; Hour: 21, Min: 49, Sec: 1; Line: 2

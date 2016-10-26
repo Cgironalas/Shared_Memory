@@ -6,8 +6,8 @@
 #include <semaphore.h>
 #include <fcntl.h>
 
-static sem_t *erika;
-static sem_t *marin;
+static sem_t *mainSem;
+static sem_t *readerSem;
 
 int createSharedMemorySegment(key_t key, int size){
 	int shmid;
@@ -62,8 +62,8 @@ void write(int lines) {
 
 int main(int argc, char *argv[]){
  	int lines; 
- 	erika = sem_open("/erika", O_CREAT, 0644, 1);
- 	//marin = sem_open("/marin", O_CREAT, 0644, 2);
+ 	mainSem = sem_open("/mainSem", O_CREAT, 0644, 1);
+ 	readerSem = sem_open("/readerSem", O_CREAT, 0644, 1);
 
     if( argc != 2 ) {
        	printf("\nERROR: Only 1 parameter expected, with the shared memory size. Program ended.\n\n");

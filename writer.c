@@ -29,7 +29,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
-static sem_t *erika;
+static sem_t *mainSem;
 
 struct Process{
     int pId;
@@ -196,7 +196,7 @@ void *beginReading(void* data){
             break;
         }else{
             if(whiteHandler[0] > 0 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
-                sem_wait(erika);
+                sem_wait(mainSem);
                 //pthread_mutex_lock(&lock);
                 writerHandler[0] = 1;
                 selfishConsecutivesHandler[0] = 0;
@@ -214,7 +214,7 @@ void *beginReading(void* data){
                 selfishHandler[0] = 0;
                 writerHandler[0] = 0;
                 
-                sem_post(erika);
+                sem_post(mainSem);
                 sleep(sleep_time);
 
             }else{
@@ -225,7 +225,7 @@ void *beginReading(void* data){
 }
 
 int main(int argc, char *argv[]){
-    erika = sem_open("/erika", 0644);
+    mainSem = sem_open("/mainSem", 0644);
     if( argc != 4 ) {
         printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
         return 0;
