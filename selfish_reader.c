@@ -170,7 +170,6 @@ void *beginSteal(void *data){
         selfishHandler = selfishSHM;
         selfishConsecutivesHandler = selfishConsecutivesSHM;
         finishHandler = finishSHM;
-        finishHandler = finishSHM;
         writerHandler = writerSHM;
         fileHandler = fileSHM;
         if(*finishHandler == 1){
