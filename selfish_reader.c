@@ -14,7 +14,7 @@ static time_t t;
 static int selfish_readers_amount; 
 static int read_time;
 static int sleep_time;
-static int type = 2;
+static int type = 3;
 static pthread_t threads[10000];
 
 //Shared memory locations 
@@ -31,7 +31,6 @@ static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
 static sem_t *erika;
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct Process{
     int pId;
@@ -171,6 +170,7 @@ void *beginSteal(void *data){
         selfishHandler = selfishSHM;
         selfishConsecutivesHandler = selfishConsecutivesSHM;
         finishHandler = finishSHM;
+        finishHandler = finishSHM;
         writerHandler = writerSHM;
         fileHandler = fileSHM;
         if(*finishHandler == 1){
@@ -179,7 +179,6 @@ void *beginSteal(void *data){
             if(selfishConsecutivesHandler[0] < 3 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
                 printf("Test\n");
                 sem_wait(erika);
-                //pthread_mutex_lock(&lock);
                 selfishHandler[0] = 1;
                 selfishConsecutivesHandler[0] += 1;
                 processesHandler[(process->pId * 4) + 3] = 1;
@@ -200,7 +199,6 @@ void *beginSteal(void *data){
                 selfishHandler[0] = 0;
 
                 sem_post(erika);
-                //pthread_mutex_lock(&lock);
                 sleep(sleep_time);
             }else{
                 processesHandler[(process->pId * 4) + 3] = 3;
@@ -211,7 +209,7 @@ void *beginSteal(void *data){
 }
 
 int main(int argc, char *argv[]){
-    erika = sem_open("/erika", 0664);
+    erika = sem_open("/erika", 0644);
     if( argc != 4 ) {
        	printf("ERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;
@@ -343,5 +341,4 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < selfish_readers_amount; i++){
         pthread_join(threads[i], NULL);
     }
-    pthread_mutex_destroy(&lock);
 }

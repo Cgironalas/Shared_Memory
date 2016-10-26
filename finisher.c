@@ -3,9 +3,13 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <semaphore.h>
 
 static int rtrn;
 static struct shmid_ds shmid_ds;
+static sem_t *erika;
+//static sem_t *marin;
 
 //Get the ID number of a shared memory segment, needed to get the address
 int getSharedMemorySegment(key_t key, int size){
@@ -55,6 +59,12 @@ int deleteSharedMemorySegment(int ID){
 }
 
 int main(int argc, char *arcgv[]){
+	erika = sem_open("/erika", 0644);
+    //marin = sem_open("/marin", 0644);
+
+    sem_unlink("/erika");
+    //sem_destroy(marin);
+
 	//Shared Memory keys
 	key_t fullLinesK = 5678;
 	key_t whiteLinesK = 5679;
@@ -138,6 +148,8 @@ int main(int argc, char *arcgv[]){
 	shm = attatchSharedMemorySegment(finishID);
 	//printf("Needs to finish: %d\n", *shm);
 	if(shm != NULL){
+		*shm = 1;
+		sleep(10);
 		deleteSharedMemorySegment(finishID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for FINISH");

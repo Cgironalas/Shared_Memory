@@ -30,7 +30,6 @@ static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
 static sem_t *erika;
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct Process{
     int pId;
@@ -78,20 +77,6 @@ int *attachSharedMemorySegment(key_t key, int size){
         return NULL; 
     } 
 } 
-
-void p(int s, struct Process p) {
-    while (s <= 0){
-        p.state = 1;
-    }
-    s -= 1;
-}
-
-void v(int s, struct Process p ) {
-    while (s < 0){
-        p.state = 0;
-    }
-    s += 1;
-}
 
 void writeLogTxt (int pid, int line) {
     FILE *results_file;
@@ -169,18 +154,29 @@ void writeMessageTxt (int pid, int line) {
 }
 
 void writeMessageSHM(int pid, int currentLine){ 
-    int place = 82 * currentLine; 
-    printf("A\n");
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    int timestamp[6];
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    timestamp[0] = timeinfo->tm_mday; timestamp[1] = timeinfo->tm_mon + 1; timestamp[2] = timeinfo->tm_year + 1900; timestamp[3] = timeinfo->tm_hour; timestamp[4] = timeinfo->tm_min; timestamp[5] = timeinfo->tm_sec;
+
+    int count = 0;
+    char buf[256];
+
+    sprintf(buf, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], currentLine);
+
+    int place = 82 * currentLine;
     while(fileHandler[place] != 0){ 
         place += 82; 
         if(place == 82 * lines){ 
             place = 0; 
         } 
     } 
-    printf("B\n");
-    char message[82] = "PID: %i; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 52, Sec: 3; Line: 10", pId; 
     for(int i = 0; i < 82; i++){ 
-        fileHandler[place + i] = message[i]; 
+        fileHandler[place + i] = buf[i]; 
     }
 } 
  
@@ -219,7 +215,6 @@ void *beginReading(void* data){
                 writerHandler[0] = 0;
                 
                 sem_post(erika);
-                //pthread_mutex_unlock(&lock);
                 sleep(sleep_time);
 
             }else{
@@ -230,11 +225,7 @@ void *beginReading(void* data){
 }
 
 int main(int argc, char *argv[]){
-    //if (pthread_mutex_init(&lock, NULL) != 0)    {
-    //    perror("\nERROR: Creating mutex.\n");
-    //    return 1;
-    //}
-    erika = sem_open("/erika", 0664);
+    erika = sem_open("/erika", 0644);
     if( argc != 4 ) {
         printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
         return 0;
@@ -340,7 +331,6 @@ int main(int argc, char *argv[]){
 
 
     for(int i = 0; i < writers_amount; i++){
-        printf("Test\n");
         while(processesHandler[0] != 0){}
         processesHandler[0] = 1;
 
@@ -365,17 +355,4 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < writers_amount; ++i) {
         pthread_join(threads[i], NULL);    
     }
-    pthread_mutex_destroy(&lock);
-
-    //Printea y escribe en archivo.
-    //writeMessageTxt(10,10); 
-    //writeMessageSHM(10, 10, fileHandler, lines); 
-    /*
-    fileHandler = fileSHM; 
-    for(int i = 0; i < 82*lines; i++){ 
-        if(i%82 == 0){ 
-            putchar('\n'); 
-        } 
-        printf("%c", *(fileHandler+i));         
-    } */
 }

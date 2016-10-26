@@ -3,14 +3,18 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 static int pId = 0;
+static int type = 2;
+static int lines;
 static FILE *results_file;
 static pthread_t reader;
 static pthread_t threads[10000];
-static int smSize = sizeof(int);
 
 static int readers_amount;
 static int read_time;
@@ -29,7 +33,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static sem_t *erika, *marin;
 
 struct Process{
     int pId;
@@ -117,6 +121,7 @@ void readLine (int pid, int line) {
 
         if (count >= line && strcmp(buf,"\n") != 0){ 
             line = count+1;
+            processesHandler[(pid*4)+4] = count+1;
             writeLogRead(pid, line, buf);
             printf("%s\n", buf);
 
@@ -136,32 +141,6 @@ void readLine (int pid, int line) {
     }
 }
 
-//Get the ID number of a shared memory segment, needed to get the address
-int getSharedMemorySegment(key_t key){
-    int shmid;
-    if((shmid = shmget(key, smSize, 0666)) < 0){
-        return (-1);
-    }
-    return (shmid);
-}
-
-//Attach the process to a shared memory segment
-char *attatchSharedMemorySegment(key_t key){
-    char *shm;
-    int ID = getSharedMemorySegment(key);
-    if(ID != -1){
-        if((shm = shmat(ID, NULL, 0)) == (char *) -1){
-            perror("ERROR: Couldn't attach shared memory segment\n");
-            return NULL;
-        }else{
-            return shm;
-        }
-    }else{
-        perror("ERROR: Couldn't create shared memory segment.\n");
-        return NULL;
-    }
-}
-
 void *beginReading(void *data){
     struct Process *process = (struct Process *) data;
     while(1){
@@ -177,53 +156,48 @@ void *beginReading(void *data){
 
         if(*finishHandler == 1){
             break;
-        }else{
-            pthread_mutex_lock(&lock);
-            
-            if(1 == 1){
-
+        }else{            
+            if(fullHandler[0] > 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
+                //sem_wait(marin);
                 readersHandler[0] += 1;
+                //if(readersHandler[0] == 1){
+                //    sem_post(marin);
+                    sem_wait(erika);
+                //}else{
+                //    sem_post(marin);
+                //}
                 selfishConsecutivesHandler[0] = 0;
-
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
                 readLine(process->pId, process->line);
-                //Leer memoria compartida
                 process->line = processesHandler[(process->pId * 4) + 4];
 
                 sleep(read_time);
                 processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
-
+                selfishHandler[0] = 0;
                 writerHandler[0] = 0;
+
+                //sem_wait(marin);
+                readersHandler[0] -= 1;
+                //if(readersHandler[0] == 0){
+                //    sem_post(marin);
+                    sem_post(erika);
+                //}else{
+                //    sem_post(marin);
+                //}
                 sleep(sleep_time);
 
             }else{
                 processesHandler[(process->pId * 4) + 3] = 3;  //Estado bloqueado
             }
-
-            pthread_mutex_unlock(&lock);
-
         }
     }
 }
 
-void p(int s, struct Process p) {
-    while (s <= 0){
-        p.block = 1;
-    }
-    s -= 1;
-}
-
-void v(int s, struct Process p ) {
-    while (s < 0){
-        p.block = 0;
-    }
-    s += 1;
-}
-
 
 int main(int argc, char *argv[]){
-
+    erika = sem_open("/erika", 0644);
+    //marin = sem_open("/marin", 0644);
     if( argc != 4 ) {
        	printf("\nERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;
@@ -244,10 +218,6 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    read_time = argv[2];
-    sleep_time = argv[3];
-    readers_amount = argv[1];
-
     //Shared memory keys
     key_t fullLinesK = 5678;
     key_t whiteLinesK = 5679;
@@ -257,58 +227,106 @@ int main(int argc, char *argv[]){
     key_t finishK = 5683;
     key_t writerK = 5684;
     key_t fileK = 5685;
-    key_t pIdCounterK = 5686;
+    key_t processesK = 5686;
     key_t linesK = 5687;
 
-    //Shared memory IDs
-    /*
-    int fullLinesID = getSharedMemorySegment(fullLinesK);
-    int whiteLinesID = getSharedMemorySegment(whiteLinesK);
-    int readersID = getSharedMemorySegment(readersK);
-    int selfishID = getSharedMemorySegment(selfishK);
-    
-    int finishID = getSharedMemorySegment(finishK);
-    int writerID = getSharedMemorySegment(writerK);
-    int fileID = getSharedMemorySegment(fileK);
-    
-    int linesID = getSharedMemorySegment(linesK);
-    */
+    linesSHM = attachSharedMemorySegment(linesK, sizeof(int));
+    if(linesSHM == NULL){
+        perror("ERROR: Couldn't get shared memory for LINES.");
+        exit(1);
+    }
+    linesHandler = linesSHM;
+    lines = (int) *linesHandler;
 
-    //Shared memory locations
-    char *fullLinesSHM, *whiteLinesSHM, *readersSHM, *selfishSHM, *selfishConsecutivesSHM, *finishSHM,
-    *writerSHM, *fileSHM, *pIdCounterSHM, *linesSHM;
-
-    //Need to attach the process to Shared Memory segments before creating child threads
-    /*
-    fullLinesSHM = attatchSharedMemorySegment(fullLinesID);
-    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesID);
-    readersSHM = attatchSharedMemorySegment(readersID);
-    selfishSHM = attatchSharedMemorySegment(selfishID);
-    
-    finishSHM = attatchSharedMemorySegment(finishID);
-    writerSHM = attatchSharedMemorySegment(writerID);
-    fileSHM = attatchSharedMemorySegment(fileID);
-    
-    linesSHM = attatchSharedMemorySegment(linesID);
-    */
-
-    fullLinesSHM = attatchSharedMemorySegment(fullLinesK);
-    whiteLinesSHM = attatchSharedMemorySegment(whiteLinesK);
-    readersSHM = attatchSharedMemorySegment(readersK);
-    selfishSHM = attatchSharedMemorySegment(selfishK);
-    
-    finishSHM = attatchSharedMemorySegment(finishK);
-    writerSHM = attatchSharedMemorySegment(writerK);
-    fileSHM = attatchSharedMemorySegment(fileK);
-    
-    //linesSHM = attatchSharedMemorySegment(linesK);
-
-    struct Process process;
-
-    for(int i = 0; i < readers_amount; i++){
-        pthread_create(&reader, NULL, beginReading, &process);
-        pthread_join(reader, NULL);
+    fullLinesSHM = attachSharedMemorySegment(fullLinesK, sizeof(int)); 
+    if(fullLinesSHM == NULL){ 
+        perror("ERROR: Couldn't get shared memory for FULL_LINES."); 
+        exit(1); 
     }
 
-    readLine(2, 22);
+    whiteLinesSHM = attachSharedMemorySegment(whiteLinesK, sizeof(int)); 
+    if(whiteLinesSHM == NULL){ 
+        perror("ERROR: Couldn't get shared memory for WHITE_LINES."); 
+        exit(1); 
+    }
+
+    readersSHM = attachSharedMemorySegment(readersK, sizeof(int)); 
+    if(readersSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for READERS."); 
+        exit(1); 
+    } 
+
+    selfishSHM = attachSharedMemorySegment(selfishK, sizeof(int)); 
+    if(selfishSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for SELFISH."); 
+        exit(1); 
+    }
+
+    selfishConsecutivesSHM = attachSharedMemorySegment(selfishConsecutivesK, sizeof(int)); 
+    if(selfishConsecutivesSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for SELFISH_CONSECUTIVES."); 
+        exit(1); 
+    }
+
+    finishSHM = attachSharedMemorySegment(finishK, sizeof(int)); 
+    if(finishSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for FINISH."); 
+        exit(1); 
+    }
+
+    writerSHM = attachSharedMemorySegment(writerK, sizeof(int)); 
+    if(writerSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for WRITER."); 
+        exit(1); 
+    }
+
+    fileSHM = attachCharSharedMemorySegment(fileK, sizeof(char) * 82 * lines); 
+    if(fileSHM == NULL){ 
+        perror("ERROR: Couldn't create shared memory for FILE."); 
+        exit(1); 
+    }
+
+    processesSHM = attachSharedMemorySegment(processesK, sizeof(int) * 40001); 
+    if(processesSHM  == NULL){ 
+        perror("ERROR: Couldn't create shared memory for PROCESSES."); 
+        exit(1); 
+    }
+
+    ///////////BEGIN
+    //Need to attach the process to Shared Memory segments before creating child threads    
+    processesHandler = processesSHM;
+    fullHandler = fullLinesSHM;
+    whiteHandler = whiteLinesSHM;
+    readersHandler = readersSHM;
+    selfishHandler = selfishSHM;
+    selfishConsecutivesHandler = selfishConsecutivesSHM;
+    finishHandler = finishSHM;
+    writerHandler = writerSHM;
+    fileHandler = fileSHM;
+
+    for(int i = 0; i < readers_amount; i++){
+        while(processesHandler[0] != 0){}
+        processesHandler[0] = 1;
+
+        int counter = 1;
+        while(processesHandler[(counter * 4) + 1] != 0){
+            counter += 4;
+            if(counter >= 40000){
+                break;
+            }
+        }
+
+        processesHandler[(counter*4) + 1] = counter;      //ID
+        processesHandler[(counter*4) + 2] = type;   //Tipo
+        processesHandler[(counter*4) + 3] = 0;      //Estado
+        processesHandler[(counter*4) + 4] = 0;      //Linea
+        processesHandler[0] = 0;
+
+        processes[i].pId = counter;
+        pthread_create(&(threads[i]), NULL, &beginReading, &(processes[i]));
+    }
+
+    for(int i = 0; i < readers_amount; i++){
+        pthread_join(threads[i], NULL);
+    }
 }

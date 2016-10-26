@@ -7,6 +7,7 @@
 #include <fcntl.h>
 
 static sem_t *erika;
+static sem_t *marin;
 
 int createSharedMemorySegment(key_t key, int size){
 	int shmid;
@@ -62,6 +63,7 @@ void write(int lines) {
 int main(int argc, char *argv[]){
  	int lines; 
  	erika = sem_open("/erika", O_CREAT, 0644, 1);
+ 	//marin = sem_open("/marin", O_CREAT, 0644, 2);
 
     if( argc != 2 ) {
        	printf("\nERROR: Only 1 parameter expected, with the shared memory size. Program ended.\n\n");
