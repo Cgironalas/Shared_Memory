@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 static int lines;
 static time_t t;
@@ -28,6 +29,9 @@ static int *finishSHM, *finishHandler;
 static int *writerSHM, *writerHandler; 
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
+
+static sem_t *erika;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct Process{
     int pId;
@@ -150,6 +154,13 @@ void stealMessageTxt (int pid, int line) {
     }
 }
 
+void stealMessageSHM(int pid, int line){
+    int place = 82 * line;
+    for(int i = 0; i < 82; i++){
+        fileHandler[place + i] = 0;
+    }
+}
+
 void *beginSteal(void *data){
     struct Process *process = (struct Process *) data;
     while(1){
@@ -167,6 +178,8 @@ void *beginSteal(void *data){
         }else{
             if(selfishConsecutivesHandler[0] < 3 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
                 printf("Test\n");
+                sem_wait(erika);
+                //pthread_mutex_lock(&lock);
                 selfishHandler[0] = 1;
                 selfishConsecutivesHandler[0] += 1;
                 processesHandler[(process->pId * 4) + 3] = 1;
@@ -177,6 +190,7 @@ void *beginSteal(void *data){
                 //printf("%d\n", selfishConsecutivesHandler);
 
                 stealMessageTxt(process->pId, line);
+                stealMessageSHM(process->pId, line);
                 //Sacar de memoria compartida
 
                 sleep(read_time);
@@ -185,8 +199,9 @@ void *beginSteal(void *data){
                 fullHandler[0] -= 1;
                 selfishHandler[0] = 0;
 
+                sem_post(erika);
+                //pthread_mutex_lock(&lock);
                 sleep(sleep_time);
-            
             }else{
                 processesHandler[(process->pId * 4) + 3] = 3;
             }
@@ -196,6 +211,7 @@ void *beginSteal(void *data){
 }
 
 int main(int argc, char *argv[]){
+    erika = sem_open("/erika", 0664);
     if( argc != 4 ) {
        	printf("ERROR: 3 parameters expected: Amount_Of_Readers, Read_Time, Sleep_Time. Program ended.\n\n");
     	return 0;
@@ -327,7 +343,5 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < selfish_readers_amount; i++){
         pthread_join(threads[i], NULL);
     }
-
-    //stealMessageTxt(2, 11);
-
+    pthread_mutex_destroy(&lock);
 }

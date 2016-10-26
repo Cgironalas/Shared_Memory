@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 static int lines;
 static int writers_amount;
@@ -28,6 +29,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
+static sem_t *erika;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct Process{
@@ -139,8 +141,8 @@ void writeMessageTxt (int pid, int line) {
 
     while (fgets(buf, sizeof(buf), results_file)){
         if (count >= line && strcmp(buf,"\n") == 0 && wrote == 0){ 
-            line = count+1;
-            processesHandler[(pid*4)+4] = count + 1;
+            line = count;
+            processesHandler[(pid*4)+4] = count;
             sprintf(buf, "PID: %i; Day: %i, Month: %i, Year: %i; Hour: %i, Min: %i, Sec: %i; Line: %i\n", pid, timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5], line);
             fputs(buf, temp); 
             wrote = 1;
@@ -168,12 +170,14 @@ void writeMessageTxt (int pid, int line) {
 
 void writeMessageSHM(int pid, int currentLine){ 
     int place = 82 * currentLine; 
+    printf("A\n");
     while(fileHandler[place] != 0){ 
         place += 82; 
         if(place == 82 * lines){ 
             place = 0; 
         } 
     } 
+    printf("B\n");
     char message[82] = "PID: %i; Day: 25, Month: 10, Year: 2016; Hour: 11, Min: 52, Sec: 3; Line: 10", pId; 
     for(int i = 0; i < 82; i++){ 
         fileHandler[place + i] = message[i]; 
@@ -195,22 +199,27 @@ void *beginReading(void* data){
         if(*finishHandler == 1){
             break;
         }else{
-            pthread_mutex_lock(&lock);
             if(whiteHandler[0] > 0 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
+                sem_wait(erika);
+                //pthread_mutex_lock(&lock);
                 writerHandler[0] = 1;
                 selfishConsecutivesHandler[0] = 0;
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
                 writeMessageTxt(process->pId, process->line);
-                writeMessageSHM(process->pId, process->line);
                 process->line = processesHandler[(process->pId * 4) + 4];
+                writeMessageSHM(process->pId, process->line);
 
                 sleep(write_time);
                 processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
                 whiteHandler[0] -= 1;
                 fullHandler[0] += 1;
-                pthread_mutex_unlock(&lock);
+                readersHandler[0] = 0;
+                selfishHandler[0] = 0;
                 writerHandler[0] = 0;
+                
+                sem_post(erika);
+                //pthread_mutex_unlock(&lock);
                 sleep(sleep_time);
 
             }else{
@@ -225,6 +234,7 @@ int main(int argc, char *argv[]){
     //    perror("\nERROR: Creating mutex.\n");
     //    return 1;
     //}
+    erika = sem_open("/erika", 0664);
     if( argc != 4 ) {
         printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
         return 0;
@@ -330,6 +340,7 @@ int main(int argc, char *argv[]){
 
 
     for(int i = 0; i < writers_amount; i++){
+        printf("Test\n");
         while(processesHandler[0] != 0){}
         processesHandler[0] = 1;
 

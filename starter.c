@@ -3,6 +3,10 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <semaphore.h>
+#include <fcntl.h>
+
+static sem_t *erika;
 
 int createSharedMemorySegment(key_t key, int size){
 	int shmid;
@@ -57,6 +61,7 @@ void write(int lines) {
 
 int main(int argc, char *argv[]){
  	int lines; 
+ 	erika = sem_open("/erika", O_CREAT, 0644, 1);
 
     if( argc != 2 ) {
        	printf("\nERROR: Only 1 parameter expected, with the shared memory size. Program ended.\n\n");
