@@ -179,6 +179,8 @@ void *beginSteal(void *data){
                 printf("Test\n");
                 sem_wait(mainSem);
                 selfishHandler[0] = 1;
+                readersHandler[0] = 0;
+                writerHandler[0] = 0;
                 selfishConsecutivesHandler[0] += 1;
                 processesHandler[(process->pId * 4) + 3] = 1;
 
@@ -195,6 +197,8 @@ void *beginSteal(void *data){
                 processesHandler[(process->pId * 4) + 3] = 2;
                 whiteHandler[0] += 1;
                 fullHandler[0] -= 1;
+                readersHandler[0] = 0;
+                writerHandler[0] = 0;
                 selfishHandler[0] = 0;
 
                 sem_post(mainSem);
