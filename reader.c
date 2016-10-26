@@ -174,11 +174,13 @@ void *beginReading(void *data){
                     sem_post(readerSem);
                 }
                 selfishConsecutivesHandler[0] = 0;
+                selfishHandler[0] = 0;
+                writerHandler[0] = 0;
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
                 readLine(process->pId, process->line);
-                readLineSHM(process->pId, process->line);
                 process->line = processesHandler[(process->pId * 4) + 4];
+                readLineSHM(process->pId, process->line);
 
                 sleep(read_time);
                 processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
@@ -225,6 +227,7 @@ int main(int argc, char *argv[]){
         printf ("\nERROR: <sleep_time> not an integer\n\n");
         return 0;
     }
+    sleep_time *= 2;
 
     //Shared memory keys
     key_t fullLinesK = 5678;
