@@ -158,14 +158,14 @@ void *beginReading(void *data){
             break;
         }else{            
             if(fullHandler[0] > 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
-                //sem_wait(readerSem);
+                sem_wait(readerSem);
                 readersHandler[0] += 1;
-                //if(readersHandler[0] == 1){
-                //    sem_post(readerSem);
+                if(readersHandler[0] == 1){
+                    sem_post(readerSem);
                     sem_wait(mainSem);
-                //}else{
-                //    sem_post(readerSem);
-                //}
+                }else{
+                    sem_post(readerSem);
+                }
                 selfishConsecutivesHandler[0] = 0;
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
@@ -177,14 +177,14 @@ void *beginReading(void *data){
                 selfishHandler[0] = 0;
                 writerHandler[0] = 0;
 
-                //sem_wait(readerSem);
+                sem_wait(readerSem);
                 readersHandler[0] -= 1;
-                //if(readersHandler[0] == 0){
-                //    sem_post(readerSem);
+                if(readersHandler[0] == 0){
+                    sem_post(readerSem);
                     sem_post(mainSem);
-                //}else{
-                //    sem_post(readerSem);
-                //}
+                }else{
+                    sem_post(readerSem);
+                }
                 sleep(sleep_time);
 
             }else{
