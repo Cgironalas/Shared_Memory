@@ -93,6 +93,16 @@ int main(int argc, char *arcgv[]){
 	char *shm2;
 
 	int lines;
+
+	shm = attatchSharedMemorySegment(finishID);
+	//printf("Needs to finish: %d\n", *shm);
+	if(shm != NULL){
+		*shm = 1;
+		sleep(10);
+		deleteSharedMemorySegment(finishID);
+	}else{
+		perror("ERROR: Attaching to the shared memory for FINISH");
+	}
 	
 	//Si se consiguio el ID del semaforo se setea el lugar de memoria correspondiente
 	shm = attatchSharedMemorySegment(linesID);
@@ -143,16 +153,6 @@ int main(int argc, char *arcgv[]){
 		deleteSharedMemorySegment(selfishConsecutivesID);
 	}else{
 		perror("ERROR: Attaching to the shared memory for SELFISH_CONSECUTIVES");
-	}
-
-	shm = attatchSharedMemorySegment(finishID);
-	//printf("Needs to finish: %d\n", *shm);
-	if(shm != NULL){
-		*shm = 1;
-		sleep(10);
-		deleteSharedMemorySegment(finishID);
-	}else{
-		perror("ERROR: Attaching to the shared memory for FINISH");
 	}
 
 	shm = attatchSharedMemorySegment(writerID);
