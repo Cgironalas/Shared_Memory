@@ -6,7 +6,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <pthread.h>
 
 static int lines;
@@ -14,7 +13,6 @@ static int writers_amount;
 static int write_time;
 static int sleep_time;
 static int type = 1;
-static pthread_t reader;
 static pthread_t threads[10000];
 
 //Shared memory locations 
@@ -30,8 +28,7 @@ static int *writerSHM, *writerHandler;
 static int *processesSHM, *processesHandler;
 static int *linesSHM, *linesHandler;
 
-//static pthread_mutex_t lock;
-
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct Process{
     int pId;
@@ -198,22 +195,22 @@ void *beginReading(void* data){
         if(*finishHandler == 1){
             break;
         }else{
-            if(*whiteHandler > 0 && *readersHandler == 0 && *selfishSHM == 0 && *writerHandler == 0){
-                //pthread_mutex_lock(&lock);
-
-                *writerHandler = 1;
-                *selfishConsecutivesHandler = 0;
+            pthread_mutex_lock(&lock);
+            if(whiteHandler[0] > 0 && readersHandler[0] == 0 && selfishHandler[0] == 0 && writerHandler[0] == 0){
+                writerHandler[0] = 1;
+                selfishConsecutivesHandler[0] = 0;
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
                 writeMessageTxt(process->pId, process->line);
                 writeMessageSHM(process->pId, process->line);
-                printf("%i\n",process->pId);
+                process->line = processesHandler[(process->pId * 4) + 4];
+
                 sleep(write_time);
                 processesHandler[(process->pId * 4) + 3] = 2;  //Estado inactivo
-                *whiteHandler -= 1;
-                *fullHandler += 1;
-                *writerHandler = 0;
-            
+                whiteHandler[0] -= 1;
+                fullHandler[0] += 1;
+                pthread_mutex_unlock(&lock);
+                writerHandler[0] = 0;
                 sleep(sleep_time);
 
             }else{
@@ -224,6 +221,10 @@ void *beginReading(void* data){
 }
 
 int main(int argc, char *argv[]){
+    //if (pthread_mutex_init(&lock, NULL) != 0)    {
+    //    perror("\nERROR: Creating mutex.\n");
+    //    return 1;
+    //}
     if( argc != 4 ) {
         printf("\nERROR: 3 parameters expected: Amount_Of_Writers, Write_Time, Sleep_time to create. Program ended.\n\n");
         return 0;
@@ -329,7 +330,6 @@ int main(int argc, char *argv[]){
 
 
     for(int i = 0; i < writers_amount; i++){
-        printf("ID %i\n", i);
         while(processesHandler[0] != 0){}
         processesHandler[0] = 1;
 
@@ -348,18 +348,13 @@ int main(int argc, char *argv[]){
         processesHandler[0] = 0;
 
         processes[i].pId = counter;
-        printf("Counter %i\n", counter);
         pthread_create(&(threads[i]), NULL, &beginReading, &(processes[i]));
-        
-        printf("D\n");
     }
 
-    int i = 0;
-    for (i = 0; i < writers_amount; ++i) {
+    for (int i = 0; i < writers_amount; ++i) {
         pthread_join(threads[i], NULL);    
     }
- 
-    printf("Test\n");
+    pthread_mutex_destroy(&lock);
 
     //Printea y escribe en archivo.
     //writeMessageTxt(10,10); 
