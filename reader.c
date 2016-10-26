@@ -141,6 +141,13 @@ void readLine (int pid, int line) {
     }
 }
 
+void readLineSHM(int pid, int line){
+    int place = 82 * line;
+    for(int i = 0; i < 82; i++){
+        fileHandler[place + i] = fileHandler[place + i];
+    }
+}
+
 void *beginReading(void *data){
     struct Process *process = (struct Process *) data;
     while(1){
@@ -170,6 +177,7 @@ void *beginReading(void *data){
                 processesHandler[(process->pId * 4) + 3] = 1;   //Estado activo            
 
                 readLine(process->pId, process->line);
+                readLineSHM(process->pId, process->line);
                 process->line = processesHandler[(process->pId * 4) + 4];
 
                 sleep(read_time);

@@ -182,6 +182,7 @@ int main(int argc, char *arcgv[]){
 
 	int remove_confirm = remove("results.txt");
     if (remove_confirm != 0) { printf("ERROR: unable to delete the file"); }
-	
+	remove_confirm = remove("temp.txt");
+
 	exit(0);
 }
